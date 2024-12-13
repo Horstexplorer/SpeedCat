@@ -1,0 +1,18 @@
+@import "../../main";
+
+.header {
+
+  .MuiToolbar-root {
+    background-color: $fast_test-secondary;
+  }
+
+  :nth-child(n){
+    color: $fast_test-text-color-on-color;
+  }
+
+  .header-app-bar {
+    position: sticky;
+    z-index: 1201; // Drawer at 1200
+  }
+
+}

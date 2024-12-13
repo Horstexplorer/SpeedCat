@@ -1,0 +1,11 @@
+.input-slider {
+
+  & .MuiSlider-markLabel[style='left: 0%;'] {
+    transform: translateX(0);
+  }
+
+  & .MuiSlider-markLabel[style='left: 100%;'] {
+    transform: translateX(-100%);
+  }
+
+}

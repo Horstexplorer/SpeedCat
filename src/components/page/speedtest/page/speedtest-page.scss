@@ -1,0 +1,33 @@
+@import "../../../../main";
+
+.speedtest-page {
+  height: 100%;
+  margin: 2rem;
+
+  .speed-display {
+    --gauge-color: #{$fast_test-secondary};
+  }
+
+  .download-display {
+    --graph-color: #{$fast_test-primary};
+  }
+
+  .latency-display {
+    --graph-color: #{$fast_test-secondary};
+  }
+
+  .upload-display {
+    --graph-color: #{$fast_test-tertiary};
+  }
+
+  .test-trigger{
+    text-align: center;
+
+    button {
+      padding: 1rem;
+      width: 100%;
+      background-color: $fast_test-primary;
+    }
+  }
+
+}

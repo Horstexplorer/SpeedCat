@@ -1,0 +1,36 @@
+.gauge-display {
+  position: relative;
+  height: 45vh;
+  width: 100%;
+
+  .plot-overlay {
+    position: absolute;
+    height: inherit;
+    width: 100%;
+    padding: 0.5rem;
+
+    .plot-overlay-content {
+      position: relative;
+      text-align: center;
+      top: 50%;
+      color: var(--graph-color);
+      h3 {
+        margin: 0;
+      }
+    }
+
+  }
+
+  .gauge-paper {
+    display: flex;
+    height: inherit;
+    border-radius: 1em;
+    padding: 0.5rem;
+
+    .gauge-graph {
+      flex: 1 1 auto;
+    }
+
+  }
+
+}

@@ -1,0 +1,21 @@
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+
+$fast_test-primary: #A14EBF;
+$fast_test-secondary: #8770BF;
+$fast_test-tertiary: #6C91BF;
+$fast_test-active: #5FB0B7;
+$fast_test-disabled: #E9D3D0;
+
+$fast_test-text-color: #000;
+$fast_test-text-color-on-color: #fff;
+
+html, body, #root {
+  height: 100%;
+}
+
+.full-width-spacer {
+  flex-grow: 1;
+}
