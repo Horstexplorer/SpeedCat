@@ -4,7 +4,7 @@ import {Mark} from "@mui/material/Slider/useSlider.types";
 
 export interface InputSliderProperties {
     id?: string
-    classname?: string
+    className?: string
     min?: number
     max?: number
     step?: number | null
@@ -18,7 +18,7 @@ export interface InputSliderProperties {
 export default function InputSlider(properties: InputSliderProperties) {
     return (
         <Slider id={properties.id}
-                className={properties.classname ? "input-slider " + properties.classname : "input-slider"}
+                className={properties.className ? `input-slider ${properties.className}` : "input-slider"}
                 min={properties.min} max={properties.max} step={properties.step}
                 marks={properties.marks}
                 value={properties.value}

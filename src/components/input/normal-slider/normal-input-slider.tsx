@@ -4,7 +4,7 @@ import InputSlider from "../slider/input-slider.tsx";
 
 export interface NonLinearSliderProperties {
     id?: string
-    classname?: string
+    className?: string
     min?: number
     max?: number
     step?: number | null
@@ -42,7 +42,7 @@ export default function NormalInputSlider(properties: NonLinearSliderProperties)
 
     return (
         <InputSlider id={properties.id}
-                     classname={properties.classname ? "non-linear-input-slider " + properties.classname : "non-linear-input-slider"}
+                     className={properties.className ? `non-linear-input-slider ${properties.className}` : "non-linear-input-slider"}
                      min={0} max={convertedMarks[convertedMarks.length - 1].value} step={properties.step}
                      marks={convertedMarks}
                      value={getIndexByActualValue(properties.value || 0)}

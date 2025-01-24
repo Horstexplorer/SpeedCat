@@ -3,13 +3,13 @@
   height: 45vh;
   width: 100%;
 
-  .plot-overlay {
+  .gauge-overlay {
     position: absolute;
     height: inherit;
     width: 100%;
     padding: 0.5rem;
 
-    .plot-overlay-content {
+    .gauge-overlay-content {
       position: relative;
       text-align: center;
       top: 50%;
@@ -22,15 +22,9 @@
   }
 
   .gauge-paper {
-    display: flex;
     height: inherit;
     border-radius: 1em;
     padding: 0.5rem;
-
-    .gauge-graph {
-      flex: 1 1 auto;
-    }
-
   }
 
 }

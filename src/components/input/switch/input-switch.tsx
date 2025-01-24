@@ -3,7 +3,7 @@ import {Switch} from "@mui/material";
 
 export interface IInputSwitchProperties {
     id?: string
-    classname?: string
+    className?: string
     value?: boolean
     onValueChange?: (value: boolean) => void
 }
@@ -11,7 +11,7 @@ export interface IInputSwitchProperties {
 export default function InputSwitch(properties: IInputSwitchProperties) {
     return (
         <Switch id={properties.id}
-                className={properties.classname ? "input-switch " + properties.classname : "input-switch"}
+                className={properties.className ? `input-switch ${properties.className}` : "input-switch"}
                 checked={properties.value}
                 onChange={(_, checked: boolean) => {
                     if (properties.onValueChange) {

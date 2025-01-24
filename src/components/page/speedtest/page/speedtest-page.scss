@@ -13,7 +13,7 @@
   }
 
   .latency-display {
-    --graph-color: #{$fast_test-secondary};
+    --scatter-color-latency: #{$fast_test-secondary};
   }
 
   .upload-display {

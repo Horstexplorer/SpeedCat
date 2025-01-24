@@ -22,10 +22,13 @@
   }
 
   .scatter-paper {
-    display: flex;
     height: inherit;
     border-radius: 1em;
     padding: 0.5rem;
+
+    .scatter-paper-grid {
+      height: 100%;
+    }
 
     .scatter-title {
       text-align: center;
@@ -36,7 +39,7 @@
     }
 
     .scatter-graph {
-      flex: 1 1 auto;
+
     }
 
   }

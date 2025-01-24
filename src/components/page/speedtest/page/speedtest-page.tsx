@@ -144,8 +144,8 @@ export default function SpeedtestPage() {
 
     return (
         <Box className="speedtest-page">
-            <Grid2 container spacing={2} columns={5}>
-                <Grid2 size={3} offset={1}>
+            <Grid2 container spacing={2} columns={1}>
+                <Grid2 size={1} >
                     <GaugeDisplay
                         className={"speed-display"}
                         currentValue={gaugeValue}
@@ -153,31 +153,33 @@ export default function SpeedtestPage() {
                         overlayText={gaugeOverlayText}
                     />
                 </Grid2>
-                <Grid2 size={1} offset={1}>
-                    <PlotDisplay
-                        className={"download-display"}
-                        title={"Download"}
-                        overlayText={downloadOverlayText}
-                        data={downloadBpsMeasurements}
-                    />
+                <Grid2 container columns={3} size={1}>
+                    <Grid2 size={1}>
+                        <PlotDisplay
+                            className={"download-display"}
+                            title={"Download"}
+                            overlayText={downloadOverlayText}
+                            data={downloadBpsMeasurements}
+                        />
+                    </Grid2>
+                    <Grid2 size={1}>
+                        <ScatterDisplay
+                            className={"latency-display"}
+                            title={"Latency"}
+                            overlayText={latencyOverlayText}
+                            data={{latency: latencyMsMeasurements}}
+                        />
+                    </Grid2>
+                    <Grid2 size={1}>
+                        <PlotDisplay
+                            className={"upload-display"}
+                            title={"Upload"}
+                            overlayText={uploadOverlayText}
+                            data={uploadBpsMeasurements}
+                        />
+                    </Grid2>
                 </Grid2>
-                <Grid2 size={1}>
-                    <ScatterDisplay
-                        className={"latency-display"}
-                        title={"Latency"}
-                        overlayText={latencyOverlayText}
-                        data={latencyMsMeasurements}
-                    />
-                </Grid2>
-                <Grid2 size={1}>
-                    <PlotDisplay
-                        className={"upload-display"}
-                        title={"Upload"}
-                        overlayText={uploadOverlayText}
-                        data={uploadBpsMeasurements}
-                    />
-                </Grid2>
-                <Grid2 size={1} offset={2} className={"test-trigger"}>
+                <Grid2 size={1} className={"test-trigger"}>
                     {
                         !testIsRunning ?
                             <Button variant="contained" onClick={runSpeedTest}>

@@ -4,7 +4,7 @@ import useAssetConfigurationStore from "../../../../api/state/asset-configuratio
 import {useEffect, useState} from "react";
 import useUserConfigurationStore from "../../../../api/state/user-configuration-state.ts";
 import {
-    buildDefaultSpeedtestUserConfiguration
+    buildDefaultSpeedtestUserConfiguration, getDefaultDataUnit
 } from "../../../../api/speedtest-user-configuration/user-configuration-builder.ts";
 import InputText from "../../../input/text/input-text.tsx";
 import SaveIcon from '@mui/icons-material/Save';
@@ -118,7 +118,8 @@ export default function SpeedtestConfigurator() {
                                                              ...configurableUserConfiguration,
                                                              display: {
                                                                  ...configurableUserConfiguration.display,
-                                                                 useSIUnits: value
+                                                                 useSIUnits: value,
+                                                                 useFixedUnit: getDefaultDataUnit(value, configurableUserConfiguration.display.useByteUnits).id
                                                              }
                                                          })
                                                      }}
@@ -134,7 +135,8 @@ export default function SpeedtestConfigurator() {
                                                              ...configurableUserConfiguration,
                                                              display: {
                                                                  ...configurableUserConfiguration.display,
-                                                                 useByteUnits: value
+                                                                 useByteUnits: value,
+                                                                 useFixedUnit: getDefaultDataUnit(configurableUserConfiguration.display.useSIUnits, value).id
                                                              }
                                                          })
                                                      }}
@@ -144,12 +146,12 @@ export default function SpeedtestConfigurator() {
                                 </Grid2>
                                 <Grid2 size={1} className={"center-align"}>
                                     <Typography>
-                                        Fixed Unit Selection
+                                        Unit Selection
                                     </Typography>
-                                    <InputSelect id={"format-using-fixed-data-unit"}
+                                    <InputSelect id={"format-using-data-unit"}
                                                  value={configurableUserConfiguration.display.useFixedUnit}
-                                                 availableValues={[...DataUnit.unitCollection(configurableUserConfiguration.display.useSIUnits, configurableUserConfiguration.display.useByteUnits), undefined].map(unit => {
-                                                     return {key: unit ? unit.id : 'Automatic', value: unit?.id}
+                                                 availableValues={DataUnit.unitCollection(configurableUserConfiguration.display.useSIUnits, configurableUserConfiguration.display.useByteUnits).map(unit => {
+                                                     return {key: `${unit.id} (${unit.unit})`, value: unit?.id}
                                                  })}
                                                  onValueChange={value => {
                                                      setConfigurableUserConfiguration({
