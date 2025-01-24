@@ -3,14 +3,14 @@ import {ISpeedtestUserConfiguration} from "../speedtest-user-configuration/user-
 import {persist} from "zustand/middleware";
 
 export interface IUserConfigurationState {
-    userConfiguration?: ISpeedtestUserConfiguration,
-    saveUserConfiguration: (configuration: ISpeedtestUserConfiguration) => void
+    userTestConfiguration?: ISpeedtestUserConfiguration,
+    saveUserTestConfiguration: (configuration: ISpeedtestUserConfiguration) => void
 }
 
 const useUserConfigurationStore = create<IUserConfigurationState>()(
     persist(
         (set, get) => ({
-            saveUserConfiguration: configuration => set({...get(), userConfiguration: configuration}),
+            saveUserTestConfiguration: configuration => set({...get(), userTestConfiguration: configuration}),
         }),
         {name: 'user-configuration-state'}
     )

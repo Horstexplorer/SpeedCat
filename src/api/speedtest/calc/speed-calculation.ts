@@ -3,7 +3,7 @@ import SpeedRequestManager, {
     SpeedRequestMethod,
     SpeedRequestState
 } from "../requests/speed-request.ts";
-import {RequestPayload} from "../requests/http-request.ts";
+import {RequestPayload} from "../../misc/http-request.ts";
 import {ChangeCalculationBuffer} from "../../misc/buffer.ts";
 import {Callback} from "../../misc/callback.ts";
 import {ACalculation, ICalculationCallbacks, ICalculationConfiguration, ICalculationResult} from "./calculation.ts";

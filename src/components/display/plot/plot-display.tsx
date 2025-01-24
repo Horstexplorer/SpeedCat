@@ -1,5 +1,5 @@
 import "./plot-display.scss"
-import {Area, AreaChart, ResponsiveContainer} from "recharts";
+import {Area, AreaChart, CartesianGrid, ResponsiveContainer} from "recharts";
 import {Box, Grid2, Paper} from "@mui/material";
 
 export interface IPlotDisplayProperties {
@@ -41,6 +41,7 @@ export default function PlotDisplay(properties: IPlotDisplayProperties){
                                         <stop offset="95%" stopColor="var(--graph-color)" stopOpacity={0}/>
                                     </linearGradient>
                                 </defs>
+                                {properties.data.length > 0 ? <CartesianGrid strokeDasharray="3 3" /> : <></>}
                                 <Area type="monotone" dataKey={"value"} stroke={"var(--graph-color)"} fill={"url(#plot-gradient-" + uid + ")"}/>
                             </AreaChart>
                         </ResponsiveContainer>

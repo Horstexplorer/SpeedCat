@@ -10,6 +10,7 @@ export interface NonLinearSliderProperties {
     step?: number | null
     marks?: Mark[]
     value?: number
+    disabled?: boolean
     onValueChange?: (value: number) => void
 }
 
@@ -20,11 +21,13 @@ export interface ScalableMark extends Mark {
 export default function NormalInputSlider(properties: NonLinearSliderProperties) {
 
     function convertMarks(marks: Mark[]): ScalableMark[] {
-        return marks.map((mark, index) => { return {
-            ...mark,
-            value: index,
-            actualValue: mark.value
-        }})
+        return marks.map((mark, index) => {
+            return {
+                ...mark,
+                value: index,
+                actualValue: mark.value
+            }
+        })
     }
 
     function getActualByIndexValue(index: number): number {
@@ -38,11 +41,13 @@ export default function NormalInputSlider(properties: NonLinearSliderProperties)
     const convertedMarks = properties.marks ? convertMarks(properties.marks) : []
 
     return (
-        <InputSlider id={properties.id} classname={properties.classname ? "non-linear-input-slider " + properties.classname : "non-linear-input-slider"}
-                     min={0} max={convertedMarks[convertedMarks.length -1].value} step={properties.step}
+        <InputSlider id={properties.id}
+                     classname={properties.classname ? "non-linear-input-slider " + properties.classname : "non-linear-input-slider"}
+                     min={0} max={convertedMarks[convertedMarks.length - 1].value} step={properties.step}
                      marks={convertedMarks}
                      value={getIndexByActualValue(properties.value || 0)}
                      scale={getActualByIndexValue}
+                     disabled={properties.disabled}
                      onValueChange={(value: number) => properties.onValueChange ? properties.onValueChange(getActualByIndexValue(value)) : {}}
         />
     )

@@ -11,52 +11,78 @@ import Speedtest, {ISpeedtestCallbacks, withDefaults} from "../../../../api/spee
 import PlotDisplay from "../../../display/plot/plot-display.tsx";
 import GaugeDisplay from "../../../display/gauge/gauge-display.tsx";
 import {convertDataValue, DataUnit} from "../../../../api/misc/data-unit-conversion.ts";
-import useDisplayConfigurationStore from "../../../../api/state/display-configuration-state.ts";
 import {ILatencyCalculationResult, ILatencyMeasurement} from "../../../../api/speedtest/calc/latency-calculation.ts";
 import {ISpeedCalculationResult, ISpeedChangeDelta} from "../../../../api/speedtest/calc/speed-calculation.ts";
+import ScatterDisplay from "../../../display/scatter/scatter-display.tsx";
 
 export default function SpeedtestPage() {
+
+    const {assetConfiguration, setAssetConfiguration} = useAssetConfigurationStore()
+    const {userTestConfiguration, saveUserTestConfiguration} = useUserConfigurationStore()
+    const [speedtest, setSpeedtest] = useState<Speedtest>()
+    const [readyToRender, setReadyToRender] = useState<boolean>(false)
+
+    useEffect(() => {
+        if (!assetConfiguration) {
+            fetchAssetConfiguration().then(config => setAssetConfiguration(config))
+        } else if (!userTestConfiguration) {
+            saveUserTestConfiguration(buildDefaultSpeedtestUserConfiguration(assetConfiguration))
+        } else {
+            setSpeedtest(new Speedtest(buildSpeedtestConfigurationFrom(assetConfiguration, userTestConfiguration), withDefaults(getSpeedtestCallbacks())))
+            setReadyToRender(true)
+        }
+    }, [assetConfiguration, userTestConfiguration, readyToRender])
+
+    function getSpeedtestCallbacks(): ISpeedtestCallbacks {
+        return {
+            latency: {
+                preHook: _ => userTestConfiguration!.latency.enabled,
+                test: {
+                    measurementCallbacks: [data => handleLatencyMeasurement(data)],
+                    resultCallbacks: [data => handleLatencyResult(data)]
+                }
+            },
+            download: {
+                preHook: _ => userTestConfiguration!.download.enabled,
+                test: {
+                    deltaCalculationCallbacks: [data => handleDownloadMeasurement(data)],
+                    resultCallbacks: [data => handleDownloadResult(data)]
+                }
+            },
+            upload: {
+                preHook: _ => userTestConfiguration!.upload.enabled,
+                test: {
+                    deltaCalculationCallbacks: [data => handleUploadMeasurement(data)],
+                    resultCallbacks: [data => handleUploadResult(data)]
+                }
+            }
+        }
+    }
 
     const [testIsRunning, setTestRunning] = useState<boolean>(false)
     const [gaugeValue, setGaugeValue] = useState<number | undefined>()
     const [gaugeOverlayText, setGaugeOverlayText] = useState<string | undefined>()
     const [latencyMsMeasurements, setLatencyMsMeasurements] = useState<number[]>([])
+
     function addLatencyMsMeasurement(value: number) {
         setLatencyMsMeasurements(prevState => [...prevState, value])
     }
+
     const [latencyOverlayText, setLatencyOverlayText] = useState<string | undefined>()
     const [downloadBpsMeasurements, setDownloadBpsMeasurements] = useState<number[]>([])
+
     function addDownloadBpsMeasurement(value: number) {
         setDownloadBpsMeasurements(prevState => [...prevState, value])
     }
+
     const [downloadOverlayText, setDownloadOverlayText] = useState<string | undefined>()
     const [uploadBpsMeasurements, setUploadBpsMeasurements] = useState<number[]>([])
+
     function addUploadBpsMeasurement(value: number) {
         setUploadBpsMeasurements(prevState => [...prevState, value])
     }
+
     const [uploadOverlayText, setUploadOverlayText] = useState<string | undefined>()
-
-    function setDefault() {
-        setGaugeValue(undefined)
-        setGaugeOverlayText("Test Not Running")
-        setLatencyMsMeasurements([0,0])
-        setLatencyOverlayText(undefined)
-        setDownloadBpsMeasurements([0,0])
-        setDownloadOverlayText(undefined)
-        setUploadBpsMeasurements([0,0])
-        setUploadOverlayText(undefined)
-    }
-
-    function setClear() {
-        setGaugeValue(undefined)
-        setGaugeOverlayText("Waiting")
-        setLatencyMsMeasurements([0])
-        setLatencyOverlayText(undefined)
-        setDownloadBpsMeasurements([0])
-        setDownloadOverlayText(undefined)
-        setUploadBpsMeasurements([0])
-        setUploadOverlayText(undefined)
-    }
 
     function handleLatencyMeasurement(data: ILatencyMeasurement) {
         addLatencyMsMeasurement(data.latency)
@@ -68,15 +94,15 @@ export default function SpeedtestPage() {
 
     function handleDownloadMeasurement(data: ISpeedChangeDelta) {
         addDownloadBpsMeasurement(data.deltaBytesPerSecond)
-        const {useSIUnits, useByteUnits, useFixedUnit} = useDisplayConfigurationStore.getState()
-        const displayValue = convertDataValue({value: data.deltaBytesPerSecond, unit: DataUnit.BYTE}, useFixedUnit, 2, useSIUnits, useByteUnits)
+        const displayValue = convertDataValue({value: data.deltaBytesPerSecond, unit: DataUnit.BYTE},
+            DataUnit.ofId(userTestConfiguration?.display.useFixedUnit), 2, userTestConfiguration?.display.useSIUnits, userTestConfiguration?.display.useByteUnits)
         setGaugeValue(displayValue.value)
         setGaugeOverlayText(`${displayValue.value} ${displayValue.unit.unit}/s`)
     }
 
     function handleDownloadResult(data: ISpeedCalculationResult) {
-        const {useSIUnits, useByteUnits, useFixedUnit} = useDisplayConfigurationStore.getState()
-        const displayValue = convertDataValue({value: data.averageBytesPerSecond, unit: DataUnit.BYTE}, useFixedUnit, 2, useSIUnits, useByteUnits)
+        const displayValue = convertDataValue({value: data.averageBytesPerSecond, unit: DataUnit.BYTE},
+            DataUnit.ofId(userTestConfiguration?.display.useFixedUnit), 2, userTestConfiguration?.display.useSIUnits, userTestConfiguration?.display.useByteUnits)
         setDownloadOverlayText(`${displayValue.value} ${displayValue.unit.unit}/s`)
         setGaugeValue(undefined)
         setGaugeOverlayText(undefined)
@@ -84,57 +110,36 @@ export default function SpeedtestPage() {
 
     function handleUploadMeasurement(data: ISpeedChangeDelta) {
         addUploadBpsMeasurement(data.deltaBytesPerSecond)
-        const {useSIUnits, useByteUnits, useFixedUnit} = useDisplayConfigurationStore.getState()
-        const displayValue = convertDataValue({value: data.deltaBytesPerSecond, unit: DataUnit.BYTE}, useFixedUnit, 2, useSIUnits, useByteUnits)
+        const displayValue = convertDataValue({value: data.deltaBytesPerSecond, unit: DataUnit.BYTE},
+            DataUnit.ofId(userTestConfiguration?.display.useFixedUnit), 2, userTestConfiguration?.display.useSIUnits, userTestConfiguration?.display.useByteUnits)
         setGaugeValue(displayValue.value)
         setGaugeOverlayText(`${displayValue.value} ${displayValue.unit.unit}/s`)
     }
 
     function handleUploadResult(data: ISpeedCalculationResult) {
-        const {useSIUnits, useByteUnits, useFixedUnit} = useDisplayConfigurationStore.getState()
-        const displayValue = convertDataValue({value: data.averageBytesPerSecond, unit: DataUnit.BYTE}, useFixedUnit, 2, useSIUnits, useByteUnits)
+        const displayValue = convertDataValue({value: data.averageBytesPerSecond, unit: DataUnit.BYTE},
+            DataUnit.ofId(userTestConfiguration?.display.useFixedUnit), 2, userTestConfiguration?.display.useSIUnits, userTestConfiguration?.display.useByteUnits)
         setUploadOverlayText(`${displayValue.value} ${displayValue.unit.unit}/s`)
         setGaugeValue(undefined)
         setGaugeOverlayText(undefined)
     }
 
-    const callbacks: ISpeedtestCallbacks = withDefaults({
-        latency: {
-            measurementCallbacks: [data => handleLatencyMeasurement(data)],
-            resultCallbacks: [data => handleLatencyResult(data)]
-        },
-        download: {
-            deltaCalculationCallbacks: [data => handleDownloadMeasurement(data)],
-            resultCallbacks: [data => handleDownloadResult(data)]
-        },
-        upload: {
-            deltaCalculationCallbacks: [data => handleUploadMeasurement(data)],
-            resultCallbacks: [data => handleUploadResult(data)]
-        }
-    })
-    const {assetConfiguration, setAssetConfiguration} = useAssetConfigurationStore()
-    const {userConfiguration, saveUserConfiguration} = useUserConfigurationStore()
-    const [speedtest, setSpeedtest] = useState<Speedtest>()
-    const [readyToRender, setReadyToRender] = useState<boolean>(false)
+    function resetTestResults() {
+        setGaugeValue(undefined)
+        setGaugeOverlayText(undefined)
+        setLatencyMsMeasurements([])
+        setLatencyOverlayText(undefined)
+        setDownloadBpsMeasurements([])
+        setDownloadOverlayText(undefined)
+        setUploadBpsMeasurements([])
+        setUploadOverlayText(undefined)
+    }
 
-    useEffect(() => {
-        if (!assetConfiguration) {
-            fetchAssetConfiguration().then(config => setAssetConfiguration(config))
-        } else if (!userConfiguration) {
-            saveUserConfiguration(buildDefaultSpeedtestUserConfiguration(assetConfiguration))
-        } else {
-            setSpeedtest(new Speedtest(buildSpeedtestConfigurationFrom(assetConfiguration, userConfiguration), withDefaults(callbacks)))
-            setDefault()
-            setReadyToRender(true)
-        }
-    }, [assetConfiguration, userConfiguration, readyToRender])
-
-    async function startTest() {
-        setClear()
+    async function runSpeedTest() {
         setTestRunning(true)
+        resetTestResults()
         await speedtest!.runTestSuit()
         setTestRunning(false)
-        setGaugeOverlayText("Test Not Running")
     }
 
     return (
@@ -157,7 +162,7 @@ export default function SpeedtestPage() {
                     />
                 </Grid2>
                 <Grid2 size={1}>
-                    <PlotDisplay
+                    <ScatterDisplay
                         className={"latency-display"}
                         title={"Latency"}
                         overlayText={latencyOverlayText}
@@ -175,7 +180,7 @@ export default function SpeedtestPage() {
                 <Grid2 size={1} offset={2} className={"test-trigger"}>
                     {
                         !testIsRunning ?
-                            <Button variant="contained" onClick={startTest}>
+                            <Button variant="contained" onClick={runSpeedTest}>
                                 START
                             </Button> : <></>
                     }

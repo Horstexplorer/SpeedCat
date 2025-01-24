@@ -5,7 +5,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import CloseIcon from "@mui/icons-material/Close";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import SpeedtestConfigurator from "./speedtest/configurator/speedtest-configurator.tsx";
-import DisplayConfigurator from "./speedtest/configurator/display-configurator.tsx";
 
 export default function Header() {
 
@@ -33,7 +32,6 @@ export default function Header() {
                 sx: { width: "100%" }
             }}>
                 <Toolbar />
-                <DisplayConfigurator/>
                 <SpeedtestConfigurator/>
             </Drawer>
         </Box>

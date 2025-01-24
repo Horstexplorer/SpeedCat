@@ -10,23 +10,25 @@ export interface InputSliderProperties {
     step?: number | null
     marks?: Mark[]
     value?: number
+    disabled?: boolean
     onValueChange?: (value: number) => void
     scale?: (value: number) => number
 }
 
 export default function InputSlider(properties: InputSliderProperties) {
     return (
-        <Slider
-            id={properties.id} className={properties.classname ? "input-slider " + properties.classname : "input-slider"}
-            min={properties.min} max={properties.max} step={properties.step}
-            marks={properties.marks}
-            value={properties.value}
-            scale={properties.scale}
-            onChange={(_: Event, value: number | number[]) => {
-                if (properties.onValueChange) {
-                    properties.onValueChange(Number.parseInt(value.toString()))
-                }
-            }}
+        <Slider id={properties.id}
+                className={properties.classname ? "input-slider " + properties.classname : "input-slider"}
+                min={properties.min} max={properties.max} step={properties.step}
+                marks={properties.marks}
+                value={properties.value}
+                disabled={properties.disabled}
+                scale={properties.scale}
+                onChange={(_: Event, value: number | number[]) => {
+                    if (properties.onValueChange) {
+                        properties.onValueChange(Number.parseInt(value.toString()))
+                    }
+                }}
         />
     )
 }

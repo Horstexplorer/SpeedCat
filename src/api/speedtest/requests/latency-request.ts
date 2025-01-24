@@ -1,5 +1,5 @@
 import {EventAggregator, EventCallback, IStatefulEvent} from "../../events/event.ts";
-import HttpRequestManager, {IHttpRequest, IHttpRequestHandling} from "./http-request.ts";
+import HttpRequestManager, {IHttpRequest, IHttpRequestHandling} from "../../misc/http-request.ts";
 
 export enum LatencyRequestMethod {
     PREFLIGHT = 'OPTIONS',

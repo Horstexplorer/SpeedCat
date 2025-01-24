@@ -1,15 +1,15 @@
-.plot-display {
+.scatter-display {
   position: relative;
   height: 15vh;
   width: 100%;
 
-  .plot-overlay {
+  .scatter-overlay {
     position: absolute;
     height: inherit;
     width: 100%;
     padding: 0.5rem;
 
-    .plot-overlay-content {
+    .scatter-overlay-content {
       position: relative;
       text-align: center;
       top: 50%;
@@ -21,13 +21,13 @@
 
   }
 
-  .plot-paper {
+  .scatter-paper {
     display: flex;
     height: inherit;
     border-radius: 1em;
     padding: 0.5rem;
 
-    .plot-title {
+    .scatter-title {
       text-align: center;
       color: var(--graph-color);
       h4 {
@@ -35,8 +35,8 @@
       }
     }
 
-    .plot-graph {
-      //flex: 1 1 auto;
+    .scatter-graph {
+      flex: 1 1 auto;
     }
 
   }

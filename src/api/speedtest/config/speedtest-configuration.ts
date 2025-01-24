@@ -1,4 +1,4 @@
-import {RequestPayload} from "../requests/http-request.ts";
+import {RequestPayload} from "../../misc/http-request.ts";
 
 export interface IURlConfig {
     url: string

@@ -1,10 +1,10 @@
 export class DataUnit {
-    readonly name: string
+    readonly id: string
     readonly unit: string
     readonly bitFactor: number
 
     constructor(name: string, unit: string, bitFactor: number) {
-        this.name = name
+        this.id = name
         this.unit = unit
         this.bitFactor = bitFactor
     }
@@ -45,14 +45,20 @@ export class DataUnit {
         }
     }
 
-    static ofName(name?: string): DataUnit | undefined {
-        const values = [
+    static all(): DataUnit[] {
+        return [
             this.BYTE, this.KILO_BYTE, this.MEGA_BYTE, this.GIGA_BYTE, this.TERA_BYTE, this.PETA_BYTE,
             this.KIBI_BYTE, this.MEBI_BYTE, this.GIBI_BYTE, this.TEBI_BYTE, this.PEBI_BYTE,
             this.BIT, this.KILO_BIT, this.MEGA_BIT, this.GIGA_BIT, this.TERA_BIT, this.PETA_BIT,
             this.KIBI_BIT, this.MEBI_BIT, this.GIBI_BIT, this.TEBI_BIT, this.PEBI_BIT
         ]
-        return values.find(value => value.name.toUpperCase() == name?.toUpperCase())
+    }
+
+    static ofId(id?: string): DataUnit | undefined {
+        if (!id) {
+            return undefined
+        }
+        return this.all().find(value => value.id.toUpperCase() == id.toUpperCase())
     }
 
 }

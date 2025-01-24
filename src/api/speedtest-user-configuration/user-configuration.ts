@@ -1,16 +1,30 @@
 import {IRequestCountLimitConfig, IRequestDurationLimitConfig} from "../speedtest/config/speedtest-configuration.ts";
 
+export interface IEnabled {
+    enabled: boolean
+}
+
 export interface IPayloadByteSize {
     payloadByteSize: number
 }
 
+export interface IValueFormattedDisplay {
+    useSIUnits: boolean,
+    useByteUnits: boolean,
+    useFixedUnit?: string
+}
+
 export interface ISpeedtestUserConfiguration {
-    latency: IRequestCountLimitConfig
+    display: IValueFormattedDisplay
+    latency: IEnabled
+        & IRequestCountLimitConfig
         & IRequestDurationLimitConfig,
-    download: IPayloadByteSize
+    download: IEnabled
+        & IPayloadByteSize
         & IRequestCountLimitConfig
         & IRequestDurationLimitConfig
-    upload: IPayloadByteSize
+    upload: IEnabled
+        & IPayloadByteSize
         & IRequestCountLimitConfig
         & IRequestDurationLimitConfig
 } 

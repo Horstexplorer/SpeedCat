@@ -13,33 +13,37 @@ import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import {fetchAssetConfiguration} from "../../../../api/speedtest-assets/asset-configuration.ts";
 import {ISpeedtestUserConfiguration} from "../../../../api/speedtest-user-configuration/user-configuration.ts";
 import NormalInputSlider from "../../../input/normal-slider/normal-input-slider.tsx";
-import {validateUserConfiguration} from "../../../../api/speedtest-user-configuration/user-configuration-verification.ts";
+import {
+    validateUserConfiguration
+} from "../../../../api/speedtest-user-configuration/user-configuration-verification.ts";
 import {convertDataValue, DataUnit} from "../../../../api/misc/data-unit-conversion.ts";
-import useDisplayConfigurationStore from "../../../../api/state/display-configuration-state.ts";
+import InputSelect from "../../../input/select/input-select.tsx";
+import InputSwitch from "../../../input/switch/input-switch.tsx";
 
 export default function SpeedtestConfigurator() {
 
     const {assetConfiguration, setAssetConfiguration} = useAssetConfigurationStore();
-    const {userConfiguration, saveUserConfiguration} = useUserConfigurationStore();
-    const {useSIUnits, useByteUnits, useFixedUnit} = useDisplayConfigurationStore()
-    const [configurableUserConfiguration, setConfigurableUserConfiguration] = useState<ISpeedtestUserConfiguration>(userConfiguration!)
+    const {userTestConfiguration, saveUserTestConfiguration} = useUserConfigurationStore();
+    const [configurableUserConfiguration, setConfigurableUserConfiguration] = useState<ISpeedtestUserConfiguration>(userTestConfiguration!)
+
     const [readyToRender, setReadyToRender] = useState<boolean>(false)
 
     useEffect(() => {
         if (!assetConfiguration) {
             fetchAssetConfiguration().then(config => setAssetConfiguration(config))
-        } else if (!userConfiguration) {
-            saveUserConfiguration(buildDefaultSpeedtestUserConfiguration(assetConfiguration))
+        } else if (!userTestConfiguration) {
+            saveUserTestConfiguration(buildDefaultSpeedtestUserConfiguration(assetConfiguration))
         } else {
-            setConfigurableUserConfiguration({...userConfiguration})
+            setConfigurableUserConfiguration({...userTestConfiguration})
             setReadyToRender(true)
         }
-    }, [assetConfiguration, userConfiguration, readyToRender]);
+    }, [assetConfiguration, userTestConfiguration, readyToRender]);
 
     function getAvailablePayloadSizeMarks(): { value: number, label: string }[] {
         return assetConfiguration?.getOrderedAvailablePayloadSizes()
             .map(option => {
-                const byteValue = convertDataValue({value: option, unit: DataUnit.BYTE}, useFixedUnit, 2, useSIUnits, useByteUnits)
+                const byteValue = convertDataValue({value: option, unit: DataUnit.BYTE},
+                    DataUnit.ofId(configurableUserConfiguration.display.useFixedUnit), 2, configurableUserConfiguration.display.useSIUnits, configurableUserConfiguration.display.useByteUnits)
                 return {
                     value: option,
                     label: `${byteValue.value} ${byteValue.unit.unit}`
@@ -49,12 +53,12 @@ export default function SpeedtestConfigurator() {
 
     function saveValidConfigurationAsUserConfig() {
         if (validateUserConfiguration(assetConfiguration!, configurableUserConfiguration)) {
-            saveUserConfiguration(configurableUserConfiguration)
+            saveUserTestConfiguration(configurableUserConfiguration)
         }
     }
 
     function restoreUserConfigFromPersistedVersion() {
-        setConfigurableUserConfiguration(userConfiguration!)
+        setConfigurableUserConfiguration(userTestConfiguration!)
     }
 
     function restoreUserConfigDefaults() {
@@ -68,19 +72,128 @@ export default function SpeedtestConfigurator() {
     return (
         <Box className="speedtest-configurator">
             <Grid2 container spacing={1} columns={1}>
+
+                <Grid2 size={1}>
+                    <Paper elevation={5} className={"configurator-paper"}>
+                        <Grid2 container spacing={2} columns={3}>
+                            <Grid2 size={1} className={"center-align"}>
+                                <Typography>Save Changes</Typography>
+                                <IconButton onClick={() => saveValidConfigurationAsUserConfig()}>
+                                    <SaveIcon/>
+                                </IconButton>
+                            </Grid2>
+                            <Grid2 size={1} className={"center-align"}>
+                                <Typography>Reload From Current</Typography>
+                                <IconButton onClick={() => restoreUserConfigFromPersistedVersion()}>
+                                    <HistoryIcon/>
+                                </IconButton>
+                            </Grid2>
+                            <Grid2 size={1} className={"center-align"}>
+                                <Typography>Restore Defaults</Typography>
+                                <IconButton onClick={() => restoreUserConfigDefaults()}>
+                                    <RotateLeftIcon/>
+                                </IconButton>
+                            </Grid2>
+                        </Grid2>
+                    </Paper>
+                </Grid2>
+
                 <Grid2 size={1}>
                     <Paper elevation={5} className={"configurator-paper"}>
                         <Grid2 container spacing={2} columns={1}>
                             <Grid2 size={1}>
-                                <Typography>Latency</Typography>
+                                Display
+                            </Grid2>
+                            <Grid2>
+
+                            </Grid2>
+                            <Grid2 container spacing={2} columns={2} size={1}>
+                                <Grid2 size={1} className={"center-align"}>
+                                    <Typography>
+                                        Binary
+                                        <InputSwitch id={"format-using-si-values"}
+                                                     value={configurableUserConfiguration.display.useSIUnits}
+                                                     onValueChange={value => {
+                                                         setConfigurableUserConfiguration({
+                                                             ...configurableUserConfiguration,
+                                                             display: {
+                                                                 ...configurableUserConfiguration.display,
+                                                                 useSIUnits: value
+                                                             }
+                                                         })
+                                                     }}
+                                        />
+                                        SI
+                                    </Typography>
+                                    <Typography>
+                                        Bit
+                                        <InputSwitch id={"format-using-bit-values"}
+                                                     value={configurableUserConfiguration.display.useByteUnits}
+                                                     onValueChange={value => {
+                                                         setConfigurableUserConfiguration({
+                                                             ...configurableUserConfiguration,
+                                                             display: {
+                                                                 ...configurableUserConfiguration.display,
+                                                                 useByteUnits: value
+                                                             }
+                                                         })
+                                                     }}
+                                        />
+                                        Byte
+                                    </Typography>
+                                </Grid2>
+                                <Grid2 size={1} className={"center-align"}>
+                                    <Typography>
+                                        Fixed Unit Selection
+                                    </Typography>
+                                    <InputSelect id={"format-using-fixed-data-unit"}
+                                                 value={configurableUserConfiguration.display.useFixedUnit}
+                                                 availableValues={[...DataUnit.unitCollection(configurableUserConfiguration.display.useSIUnits, configurableUserConfiguration.display.useByteUnits), undefined].map(unit => {
+                                                     return {key: unit ? unit.id : 'Automatic', value: unit?.id}
+                                                 })}
+                                                 onValueChange={value => {
+                                                     setConfigurableUserConfiguration({
+                                                         ...configurableUserConfiguration,
+                                                         display: {
+                                                             ...configurableUserConfiguration.display,
+                                                             useFixedUnit: value
+                                                         }
+                                                     })
+                                                 }}
+                                    />
+                                </Grid2>
+                            </Grid2>
+                        </Grid2>
+                    </Paper>
+                </Grid2>
+
+                <Grid2 size={1}>
+                    <Paper elevation={5} className={"configurator-paper"}>
+                        <Grid2 container spacing={2} columns={1}>
+                            <Grid2 size={1}>
+                                Latency
+                                <InputSwitch id={"enable-latency-test"}
+                                             value={configurableUserConfiguration?.latency.enabled}
+                                             onValueChange={value => {
+                                                 setConfigurableUserConfiguration({
+                                                     ...configurableUserConfiguration,
+                                                     latency: {
+                                                         ...configurableUserConfiguration.latency,
+                                                         enabled: value
+                                                     }
+                                                 })
+                                             }}
+                                />
                             </Grid2>
                             <Grid2 size={1}>
                                 <InputText id={"latency-max-amount"}
                                            label={"max. Request Amount"}
                                            type={"number"}
+                                           disabled={!configurableUserConfiguration?.latency.enabled}
                                            value={configurableUserConfiguration?.latency.maxRequests}
                                            onValueChange={(value: string) => {
-                                               setConfigurableUserConfiguration({...configurableUserConfiguration,
+                                               setConfigurableUserConfiguration({
+                                                   ...configurableUserConfiguration,
                                                    latency: {
                                                        ...configurableUserConfiguration.latency,
                                                        maxRequests: Number.parseInt(value)
@@ -93,9 +206,11 @@ export default function SpeedtestConfigurator() {
                                 <InputText id={"latency-max-duration"}
                                            label={"max. Request Duration (ms)"}
                                            type={"number"}
+                                           disabled={!configurableUserConfiguration?.latency.enabled}
                                            value={configurableUserConfiguration?.latency.maxDuration}
                                            onValueChange={(value: string) => {
-                                               setConfigurableUserConfiguration({...configurableUserConfiguration,
+                                               setConfigurableUserConfiguration({
+                                                   ...configurableUserConfiguration,
                                                    latency: {
                                                        ...configurableUserConfiguration.latency,
                                                        maxDuration: Number.parseInt(value)
@@ -112,7 +227,19 @@ export default function SpeedtestConfigurator() {
                     <Paper elevation={5} className={"configurator-paper"}>
                         <Grid2 container spacing={2} columns={1}>
                             <Grid2 size={1}>
-                                <Typography>Download</Typography>
+                                Download
+                                <InputSwitch id={"enable-download-test"}
+                                             value={configurableUserConfiguration?.download.enabled}
+                                             onValueChange={value => {
+                                                 setConfigurableUserConfiguration({
+                                                     ...configurableUserConfiguration,
+                                                     download: {
+                                                         ...configurableUserConfiguration.download,
+                                                         enabled: value
+                                                     }
+                                                 })
+                                             }}
+                                />
                             </Grid2>
                             <Grid2 size={1}>
                                 <NormalInputSlider id={"download-payload-size"}
@@ -120,9 +247,11 @@ export default function SpeedtestConfigurator() {
                                                    max={getAvailablePayloadSizeMarks()[getAvailablePayloadSizeMarks().length - 1]?.value}
                                                    step={null}
                                                    marks={getAvailablePayloadSizeMarks()}
+                                                   disabled={!configurableUserConfiguration?.download.enabled}
                                                    value={configurableUserConfiguration?.download.payloadByteSize}
                                                    onValueChange={(value) => {
-                                                       setConfigurableUserConfiguration({...configurableUserConfiguration,
+                                                       setConfigurableUserConfiguration({
+                                                           ...configurableUserConfiguration,
                                                            download: {
                                                                ...configurableUserConfiguration.download,
                                                                payloadByteSize: value
@@ -135,9 +264,11 @@ export default function SpeedtestConfigurator() {
                                 <InputText id={"download-max-amount"}
                                            label={"max. Request Amount"}
                                            type={"number"}
+                                           disabled={!configurableUserConfiguration?.download.enabled}
                                            value={configurableUserConfiguration?.download.maxRequests}
                                            onValueChange={(value: string) => {
-                                               setConfigurableUserConfiguration({...configurableUserConfiguration,
+                                               setConfigurableUserConfiguration({
+                                                   ...configurableUserConfiguration,
                                                    download: {
                                                        ...configurableUserConfiguration.download,
                                                        maxRequests: Number.parseInt(value)
@@ -150,9 +281,11 @@ export default function SpeedtestConfigurator() {
                                 <InputText id={"download-max-duration"}
                                            label={"max. Request Duration (ms)"}
                                            type={"number"}
+                                           disabled={!configurableUserConfiguration?.download.enabled}
                                            value={configurableUserConfiguration?.download.maxDuration}
                                            onValueChange={(value: string) => {
-                                               setConfigurableUserConfiguration({...configurableUserConfiguration,
+                                               setConfigurableUserConfiguration({
+                                                   ...configurableUserConfiguration,
                                                    download: {
                                                        ...configurableUserConfiguration.download,
                                                        maxDuration: Number.parseInt(value)
@@ -169,7 +302,19 @@ export default function SpeedtestConfigurator() {
                     <Paper elevation={5} className={"configurator-paper"}>
                         <Grid2 container spacing={2} columns={1}>
                             <Grid2 size={1}>
-                                <Typography>Upload</Typography>
+                                Upload
+                                <InputSwitch id={"enable-upload-test"}
+                                             value={configurableUserConfiguration?.upload.enabled}
+                                             onValueChange={value => {
+                                                 setConfigurableUserConfiguration({
+                                                     ...configurableUserConfiguration,
+                                                     upload: {
+                                                         ...configurableUserConfiguration.upload,
+                                                         enabled: value
+                                                     }
+                                                 })
+                                             }}
+                                />
                             </Grid2>
                             <Grid2 size={1}>
                                 <NormalInputSlider id={"upload-payload-size"}
@@ -177,9 +322,11 @@ export default function SpeedtestConfigurator() {
                                                    max={getAvailablePayloadSizeMarks()[getAvailablePayloadSizeMarks().length - 1]?.value}
                                                    step={null}
                                                    marks={getAvailablePayloadSizeMarks()}
+                                                   disabled={!configurableUserConfiguration?.upload.enabled}
                                                    value={configurableUserConfiguration?.upload.payloadByteSize}
                                                    onValueChange={(value) => {
-                                                       setConfigurableUserConfiguration({...configurableUserConfiguration,
+                                                       setConfigurableUserConfiguration({
+                                                           ...configurableUserConfiguration,
                                                            upload: {
                                                                ...configurableUserConfiguration.upload,
                                                                payloadByteSize: value
@@ -192,9 +339,11 @@ export default function SpeedtestConfigurator() {
                                 <InputText id={"upload-max-amount"}
                                            label={"max. Request Amount"}
                                            type={"number"}
+                                           disabled={!configurableUserConfiguration?.upload.enabled}
                                            value={configurableUserConfiguration?.upload.maxRequests}
                                            onValueChange={(value: string) => {
-                                               setConfigurableUserConfiguration({...configurableUserConfiguration,
+                                               setConfigurableUserConfiguration({
+                                                   ...configurableUserConfiguration,
                                                    upload: {
                                                        ...configurableUserConfiguration.upload,
                                                        maxRequests: Number.parseInt(value)
@@ -207,9 +356,11 @@ export default function SpeedtestConfigurator() {
                                 <InputText id={"upload-max-duration"}
                                            label={"max. Request Duration (ms)"}
                                            type={"number"}
+                                           disabled={!configurableUserConfiguration?.upload.enabled}
                                            value={configurableUserConfiguration?.upload.maxDuration}
                                            onValueChange={(value: string) => {
-                                               setConfigurableUserConfiguration({...configurableUserConfiguration,
+                                               setConfigurableUserConfiguration({
+                                                   ...configurableUserConfiguration,
                                                    upload: {
                                                        ...configurableUserConfiguration.upload,
                                                        maxDuration: Number.parseInt(value)
@@ -217,31 +368,6 @@ export default function SpeedtestConfigurator() {
                                                })
                                            }}
                                 />
-                            </Grid2>
-                        </Grid2>
-                    </Paper>
-                </Grid2>
-
-                <Grid2 size={1}>
-                    <Paper elevation={5} className={"configurator-paper"}>
-                        <Grid2 container spacing={2} columns={3}>
-                            <Grid2 size={1}>
-                                <Typography>Save Changes</Typography>
-                                <IconButton onClick={() => saveValidConfigurationAsUserConfig()}>
-                                    <SaveIcon/>
-                                </IconButton>
-                            </Grid2>
-                            <Grid2 size={1}>
-                                <Typography>Reload From Current</Typography>
-                                <IconButton onClick={() => restoreUserConfigFromPersistedVersion()}>
-                                    <HistoryIcon/>
-                                </IconButton>
-                            </Grid2>
-                            <Grid2 size={1}>
-                                <Typography>Restore Defaults</Typography>
-                                <IconButton onClick={() => restoreUserConfigDefaults()}>
-                                    <RotateLeftIcon/>
-                                </IconButton>
                             </Grid2>
                         </Grid2>
                     </Paper>

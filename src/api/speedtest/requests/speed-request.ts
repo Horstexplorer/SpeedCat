@@ -1,5 +1,5 @@
 import {EventAggregator, EventCallback, IStatefulEvent} from "../../events/event.ts";
-import HttpRequestManager, {IHttpRequest, IHttpRequestHandling, RequestPayload} from "./http-request.ts";
+import HttpRequestManager, {IHttpRequest, IHttpRequestHandling, RequestPayload} from "../../misc/http-request.ts";
 
 export enum SpeedRequestMethod {
     DOWNLOAD = 'GET',
