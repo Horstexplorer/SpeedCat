@@ -7,6 +7,8 @@ RUN apt update &&\
 WORKDIR /application
 
 COPY docker-entrypoint.sh .
+RUN chmod +x docker-entrypoint.sh
+
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/site.conf  /etc/nginx/conf.d/size.conf
 COPY dist /application/www
