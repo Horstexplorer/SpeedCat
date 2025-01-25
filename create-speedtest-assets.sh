@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -f ./public/speedtest/asset-index.json ]; then
-  FAST_TEST_PAYLOAD_SIZES=(${FAST_TEST_PAYLOAD_SIZES:-0 25 50 100 250})
+  FAST_TEST_PAYLOAD_SIZES=(${FAST_TEST_PAYLOAD_SIZES:-0 25 50 100 250 500 1000})
   echo "No asset index found - Creating assets ..."
   rm -rf ./public/speedtest
   mkdir -p ./public/speedtest/assets

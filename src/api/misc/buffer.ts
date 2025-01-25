@@ -7,7 +7,7 @@ export class ChangeCalculationBuffer<I, O> {
         this.onCapture = onNext
     }
 
-    public calculate(next: I): O {
+    public push(next: I): O {
         const output = this.onCapture(this.previous, next)
         this.previous = next
         return output

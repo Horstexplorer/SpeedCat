@@ -1,5 +1,6 @@
 import SpeedRequestManager, {
-    ISpeedStateChangeEvent, SpeedChangeEventCallback,
+    ISpeedStateChangeEvent,
+    SpeedChangeEventCallback,
     SpeedRequestMethod,
     SpeedRequestState
 } from "../requests/speed-request.ts";
@@ -103,18 +104,18 @@ export default class SpeedCalculation extends ACalculation<ISpeedCalculationConf
         while (continueIteration()) {
             iterationCount++
             const iterationStartTime = window.performance.now()
-
+            calculationBuffer.push({timestamp: iterationStartTime}) // prefill to resolve issues caused by too fast data transfer
             await requestManager.performSpeedRequest({
                 method: this.configuration.method,
                 url: this.configuration.url,
                 timeout: remainingUntilTimeout(),
                 payload: this.configuration.payload
             }, (event: ISpeedStateChangeEvent) => {
+                if (event.state !== SpeedRequestState.PROGRESS)
+                    return
                 if (callbacks?.measurementCallbacks)
                     callbacks.measurementCallbacks.forEach(callback => callback(event))
-                if (event.state !== SpeedRequestState.STARTED && event.state !== SpeedRequestState.PROGRESS)
-                    return
-                const speedEventDelta = calculationBuffer.calculate(event)
+                const speedEventDelta = calculationBuffer.push(event)
                 if (speedEventDelta.deltaTime <= 0 || speedEventDelta.deltaBytes <= 0)
                     return
                 measurements.push(speedEventDelta)

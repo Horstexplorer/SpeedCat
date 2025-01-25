@@ -36,8 +36,8 @@ export async function performHttpRequest(requestDetails: IHttpRequest, requestHa
         const xhrRequest = new XMLHttpRequest()
         if (requestDetails.timeout)
             xhrRequest.timeout = requestDetails.timeout
-        xhrRequest.open(requestDetails.method, requestDetails.url, true)
         requestHandling.configuration(xhrRequest, resolve, reject)
+        xhrRequest.open(requestDetails.method, requestDetails.url, true)
         xhrRequest.send(requestDetails.payload)
     })
 }
