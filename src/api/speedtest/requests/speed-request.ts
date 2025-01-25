@@ -50,9 +50,6 @@ export default class SpeedRequestManager extends HttpRequestManager {
 
     async performSpeedRequest(request: ISpeedRequest, ...eventCallbacks: SpeedChangeEventCallback[]): Promise<ISpeedStateChangeEvent[]> {
         const requestHandling: IHttpRequestHandling = {
-            xhr: {
-                provider: () => new window.XMLHttpRequest()
-            },
             configuration: (xhr: XMLHttpRequest, resolve: (value: unknown) => void, _: (reason?: any) => void) => {
                 const aggregator = new EventAggregator<ISpeedStateChangeEvent>(...eventCallbacks)
                 xhr.addEventListener("progress", (event) =>
@@ -71,6 +68,7 @@ export default class SpeedRequestManager extends HttpRequestManager {
                         resolve(aggregator.events)
                     }
                 })
+                xhr.responseType = 'blob'
             }
         }
         return this.performHttpRequest(this.convertRequest(request), requestHandling)

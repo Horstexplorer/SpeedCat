@@ -1,10 +1,6 @@
 export type RequestPayload = Document | XMLHttpRequestBodyInit | null
 
 export interface IHttpRequestHandling {
-    xhr: {
-        provider: () => XMLHttpRequest
-        customization?: (xhr: XMLHttpRequest) => void
-    }
     configuration: (xhr: XMLHttpRequest, resolve: (value: unknown) => void, reject: (reason?: any) => void) => void
 }
 
@@ -37,13 +33,11 @@ export async function performHttpRequest(requestDetails: IHttpRequest, requestHa
             reject("Cannot send request: Missing request handling")
             return
         }
-        const xhrRequest = requestHandling.xhr.provider()
-        if (requestHandling?.xhr.customization)
-            requestHandling.xhr.customization(xhrRequest)
-        requestHandling.configuration(xhrRequest, resolve, reject)
+        const xhrRequest = new XMLHttpRequest()
         if (requestDetails.timeout)
             xhrRequest.timeout = requestDetails.timeout
-        xhrRequest.open(requestDetails.method, requestDetails.url)
+        xhrRequest.open(requestDetails.method, requestDetails.url, true)
+        requestHandling.configuration(xhrRequest, resolve, reject)
         xhrRequest.send(requestDetails.payload)
     })
 }

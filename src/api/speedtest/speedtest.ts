@@ -60,7 +60,7 @@ export default class Speedtest {
         return new Promise<void>((resolve) => resolve())
             .then(() => {
                 const configuration: ILatencyCalculationConfiguration = {
-                    method: LatencyRequestMethod.PREFLIGHT,
+                    method: LatencyRequestMethod.HEAD,
                     url: this.configuration.latency.url,
                     parameters: {
                         maxDuration: this.configuration.latency.maxDuration,

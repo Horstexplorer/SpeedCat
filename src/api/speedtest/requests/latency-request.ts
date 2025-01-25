@@ -45,9 +45,6 @@ export default class LatencyRequestManager extends HttpRequestManager {
 
     async performLatencyRequest(request: ILatencyRequest, ...eventCallbacks: LatencyStateChangeEventCallback[]): Promise<ILatencyStateChangeEvent[]> {
         const requestHandling: IHttpRequestHandling = {
-            xhr: {
-                provider: () => new window.XMLHttpRequest()
-            },
             configuration: (xhr: XMLHttpRequest, resolve: (value: unknown) => void, _: (reason?: any) => void) => {
                 const aggregator = new EventAggregator<ILatencyStateChangeEvent>(...eventCallbacks)
                 xhr.addEventListener("readystatechange", () => {
@@ -64,6 +61,7 @@ export default class LatencyRequestManager extends HttpRequestManager {
                 xhr.addEventListener("loadend", () => {
                     resolve(aggregator.events)
                 })
+                xhr.responseType = 'blob'
             }
         }
         return this.performHttpRequest(this.convertRequest(request), requestHandling)
