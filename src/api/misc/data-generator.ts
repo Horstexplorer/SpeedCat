@@ -5,7 +5,3 @@ export function generateRandomData(length: number): Uint8Array {
     }
     return buffer
 }
-
-export function generateRandomStringSequence(length: number): string {
-    return new TextDecoder().decode(generateRandomData(length))
-}

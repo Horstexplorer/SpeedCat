@@ -1,5 +1,7 @@
 import {EventAggregator, EventCallback, IStatefulEvent} from "../../events/event.ts";
-import HttpRequestManager, {IHttpRequest, IHttpRequestHandling, RequestPayload} from "../../misc/http-request.ts";
+import {IHttpRequest, IHttpRequestHandling, performCustomHttpRequest, RequestPayload} from "../../misc/http/http-request.ts";
+import {DataUnit, DataUnits} from "../../misc/units/types/data-units.ts";
+import Value from "../../misc/units/value.ts";
 
 export enum SpeedRequestMethod {
     DOWNLOAD = 'GET',
@@ -21,57 +23,47 @@ export enum SpeedRequestState {
 }
 
 export interface ISpeedStateChangeEvent extends IStatefulEvent<SpeedRequestState> {
-    transferredBytes?: number
+    transferredData?: Value<DataUnit>
 }
 export type SpeedChangeEventCallback = EventCallback<ISpeedStateChangeEvent>
 
-export default class SpeedRequestManager extends HttpRequestManager {
+export default function performSpeedRequest(request: ISpeedRequest, ...eventCallbacks: SpeedChangeEventCallback[]): Promise<ISpeedStateChangeEvent[]> {
 
-    constructor() {
-        super()
-    }
-
-    protected convertRequest(request: ISpeedRequest): IHttpRequest {
-        return {
-            method: request.method,
-            url: request.url,
-            timeout: request.timeout,
-            payload: request.payload
-        }
-    }
-
-    protected eventOf(state: SpeedRequestState, transferredBytes?: number): ISpeedStateChangeEvent {
+    function eventOf(state: SpeedRequestState, transferredBytes?: number): ISpeedStateChangeEvent {
         return {
             timestamp: window.performance.now(),
             state: state,
-            transferredBytes: transferredBytes
+            transferredData: transferredBytes ? new Value(transferredBytes, DataUnits.BYTE) : undefined
         }
     }
 
-    async performSpeedRequest(request: ISpeedRequest, ...eventCallbacks: SpeedChangeEventCallback[]): Promise<ISpeedStateChangeEvent[]> {
-        const requestHandling: IHttpRequestHandling = {
-            configuration: (xhr: XMLHttpRequest, resolve: (value: unknown) => void, _: (reason?: any) => void) => {
-                const aggregator = new EventAggregator<ISpeedStateChangeEvent>(...eventCallbacks)
-                xhr.addEventListener("progress", (event) =>
-                    aggregator.capture(this.eventOf(SpeedRequestState.PROGRESS, event.lengthComputable ? event.loaded : undefined)))
-                xhr.upload.addEventListener("progress", (event) =>
-                    aggregator.capture(this.eventOf(SpeedRequestState.PROGRESS, event.lengthComputable ? event.loaded : undefined)))
-                xhr.addEventListener("readystatechange", () => {
-                    if (xhr.readyState == XMLHttpRequest.OPENED) {
-                        aggregator.capture(this.eventOf(SpeedRequestState.STARTED))
-                    }
-                    if (xhr.readyState == XMLHttpRequest.DONE) {
-                        if (!(xhr.status >= 200 && xhr.status < 400)) {
-                            aggregator.capture(this.eventOf(SpeedRequestState.FAILURE))
-                        }
-                        aggregator.capture(this.eventOf(SpeedRequestState.COMPLETED))
-                        resolve(aggregator.events)
-                    }
-                })
-                xhr.responseType = 'blob'
-            }
-        }
-        return this.performHttpRequest(this.convertRequest(request), requestHandling)
+    const httpRequest: IHttpRequest = {
+        method: request.method,
+        url: request.url,
+        timeout: request.timeout,
+        payload: request.payload
     }
-
+    const httpRequestHandling: IHttpRequestHandling<ISpeedStateChangeEvent[], undefined> = {
+        configuration: (xhr: XMLHttpRequest, resolve: (value: ISpeedStateChangeEvent[]) => void, _: (reason?: undefined) => void) => {
+            const aggregator = new EventAggregator<ISpeedStateChangeEvent>(...eventCallbacks)
+            xhr.addEventListener("progress", (event) =>
+                aggregator.capture(eventOf(SpeedRequestState.PROGRESS, event.lengthComputable ? event.loaded : undefined)))
+            xhr.upload.addEventListener("progress", (event) =>
+                aggregator.capture(eventOf(SpeedRequestState.PROGRESS, event.lengthComputable ? event.loaded : undefined)))
+            xhr.addEventListener("readystatechange", () => {
+                if (xhr.readyState == XMLHttpRequest.OPENED) {
+                    aggregator.capture(eventOf(SpeedRequestState.STARTED))
+                }
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (!(xhr.status >= 200 && xhr.status < 400)) {
+                        aggregator.capture(eventOf(SpeedRequestState.FAILURE))
+                    }
+                    aggregator.capture(eventOf(SpeedRequestState.COMPLETED))
+                    resolve(aggregator.events)
+                }
+            })
+            xhr.responseType = 'blob'
+        }
+    }
+    return performCustomHttpRequest(httpRequest, httpRequestHandling)
 }

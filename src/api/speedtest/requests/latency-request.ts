@@ -1,5 +1,9 @@
 import {EventAggregator, EventCallback, IStatefulEvent} from "../../events/event.ts";
-import HttpRequestManager, {IHttpRequest, IHttpRequestHandling} from "../../misc/http-request.ts";
+import {
+    IHttpRequest,
+    IHttpRequestHandling,
+    performCustomHttpRequest
+} from "../../misc/http/http-request.ts";
 
 export enum LatencyRequestMethod {
     PREFLIGHT = 'OPTIONS',
@@ -22,48 +26,37 @@ export enum LatencyRequestState {
 export type ILatencyStateChangeEvent = IStatefulEvent<LatencyRequestState>
 export type LatencyStateChangeEventCallback = EventCallback<ILatencyStateChangeEvent>
 
-export default class LatencyRequestManager extends HttpRequestManager {
+export default function performLatencyRequest(request: ILatencyRequest, ...eventCallbacks: LatencyStateChangeEventCallback[]): Promise<ILatencyStateChangeEvent[]> {
 
-    constructor() {
-        super()
-    }
-
-    protected convertRequest(request: ILatencyRequest): IHttpRequest {
-        return {
-            method: request.method,
-            url: request.url,
-            timeout: request.timeout
-        }
-    }
-
-    protected eventOf(state: LatencyRequestState): ILatencyStateChangeEvent {
+    function eventOf(state: LatencyRequestState): ILatencyStateChangeEvent {
         return {
             timestamp: window.performance.now(),
             state: state
         }
     }
 
-    async performLatencyRequest(request: ILatencyRequest, ...eventCallbacks: LatencyStateChangeEventCallback[]): Promise<ILatencyStateChangeEvent[]> {
-        const requestHandling: IHttpRequestHandling = {
-            configuration: (xhr: XMLHttpRequest, resolve: (value: unknown) => void, _: (reason?: any) => void) => {
-                const aggregator = new EventAggregator<ILatencyStateChangeEvent>(...eventCallbacks)
-                xhr.addEventListener("readystatechange", () => {
-                    if (xhr.readyState == XMLHttpRequest.OPENED) {
-                        aggregator.capture(this.eventOf(LatencyRequestState.STARTED))
-                    }
-                    if (xhr.readyState == XMLHttpRequest.DONE) {
-                        if (!(xhr.status >= 200 && xhr.status < 400)) {
-                            aggregator.capture(this.eventOf(LatencyRequestState.FAILURE))
-                        }
-                        aggregator.capture(this.eventOf(LatencyRequestState.COMPLETED))
-                    }
-                })
-                xhr.addEventListener("loadend", () => {
-                    resolve(aggregator.events)
-                })
-                xhr.responseType = 'blob'
-            }
-        }
-        return this.performHttpRequest(this.convertRequest(request), requestHandling)
+    const httpRequest: IHttpRequest = {
+        method: request.method,
+        url: request.url,
+        timeout: request.timeout
     }
+    const httpRequestHandling: IHttpRequestHandling<ILatencyStateChangeEvent[], undefined> = {
+        configuration: (xhr: XMLHttpRequest, resolve: (value: ILatencyStateChangeEvent[]) => void, _: (reason?: undefined) => void) => {
+            const aggregator = new EventAggregator<ILatencyStateChangeEvent>(...eventCallbacks)
+            xhr.addEventListener("readystatechange", () => {
+                if (xhr.readyState == XMLHttpRequest.OPENED) {
+                    aggregator.capture(eventOf(LatencyRequestState.STARTED))
+                }
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (!(xhr.status >= 200 && xhr.status < 400)) {
+                        aggregator.capture(eventOf(LatencyRequestState.FAILURE))
+                    }
+                    aggregator.capture(eventOf(LatencyRequestState.COMPLETED))
+                    resolve(aggregator.events)
+                }
+            })
+            xhr.responseType = 'blob'
+        }
+    }
+    return performCustomHttpRequest(httpRequest, httpRequestHandling)
 }
