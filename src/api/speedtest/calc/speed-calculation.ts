@@ -1,19 +1,23 @@
-import SpeedRequestManager, {
+import performSpeedRequest, {
     ISpeedStateChangeEvent,
     SpeedChangeEventCallback,
     SpeedRequestMethod,
     SpeedRequestState
 } from "../requests/speed-request.ts";
-import {RequestPayload} from "../../misc/http-request.ts";
-import {ChangeCalculationBuffer} from "../../misc/buffer.ts";
+import {RequestPayload} from "../../misc/http/http-request.ts";
+import {ChangeCalculationBuffer} from "../../misc/change-buffer.ts";
 import {Callback} from "../../misc/callback.ts";
 import {ACalculation, ICalculationCallbacks, ICalculationConfiguration, ICalculationResult} from "./calculation.ts";
+import {DataUnit, DataUnitBase, DataUnits, DataUnitType} from "../../misc/units/types/data-units.ts";
+import Value from "../../misc/units/value.ts";
+import {iterateTask} from "../../misc/iteration/iteration.ts";
 
 export interface ISpeedCalculationConfiguration extends ICalculationConfiguration {
     method: SpeedRequestMethod
     url: string
     payload?: RequestPayload
     parameters: {
+        minDelay: number
         maxDuration: number
         maxRequests: number
     }
@@ -21,16 +25,15 @@ export interface ISpeedCalculationConfiguration extends ICalculationConfiguratio
 
 export interface ISpeedChangeDelta {
     deltaTime: number
-    deltaBytes: number
-    deltaBytesPerSecond: number
+    deltaData: Value<DataUnit>
+    deltaDataPerSecond: Value<DataUnit>
 }
 
 export type SpeedChangeDeltaCallback = Callback<ISpeedChangeDelta>
 
 export interface ISpeedCalculationResult extends ICalculationResult {
-    success: boolean
     samples: number
-    averageBytesPerSecond: number
+    averagePerSecond: Value<DataUnit>
 }
 
 export type SpeedCalculationResultCallback = Callback<ISpeedCalculationResult>
@@ -45,10 +48,12 @@ export function withDefaults(callbacks?: ISpeedCalculationCallbacks, message?: s
     const copy: ISpeedCalculationCallbacks = callbacks ? {...callbacks} : {}
     if (!copy.deltaCalculationCallbacks)
         copy.deltaCalculationCallbacks = []
-    copy.deltaCalculationCallbacks?.push((delta) => console.debug(message, `${delta.deltaBytesPerSecond} Bytes/s`, delta))
+    copy.deltaCalculationCallbacks?.push((delta) =>
+        console.debug(message, `${DataUnits.fit(delta.deltaDataPerSecond, DataUnitType.SI, DataUnitBase.BYTE)}`, delta))
     if (!copy.resultCallbacks)
         copy.resultCallbacks = []
-    copy.resultCallbacks.push((result) =>  console.debug(message,`${result.averageBytesPerSecond} Bytes/s`, result))
+    copy.resultCallbacks.push((result) =>
+        console.debug(message, `${DataUnits.fit(result.averagePerSecond, DataUnitType.SI, DataUnitBase.BYTE)}`, result))
     return copy
 }
 
@@ -59,56 +64,45 @@ export default class SpeedCalculation extends ACalculation<ISpeedCalculationConf
     }
 
     protected calculateChangeDelta(previous: ISpeedStateChangeEvent | undefined, next: ISpeedStateChangeEvent): ISpeedChangeDelta {
-        function toDelta(deltaTime: number, deltaBytes: number) {
-            return {
-                deltaTime: deltaTime,
-                deltaBytes: deltaBytes,
-                deltaBytesPerSecond: Math.round(((deltaBytes / deltaTime) * 1000))
-            }
-        }
+        const previousData = previous?.transferredData ? previous.transferredData : new Value(0, DataUnits.BYTE)
+        const nextData = next?.transferredData ? next.transferredData : new Value(0, DataUnits.BYTE)
+        const deltaData = nextData.value > previousData.value ? nextData.subtractValue(previousData) : nextData
+        const deltaTime = previous ? next.timestamp - previous.timestamp : 0
 
-        const previousBytes = previous?.transferredBytes ? previous?.transferredBytes : 0
-        const nextBytes = next?.transferredBytes ? next?.transferredBytes : 0
-        if (!previous || previousBytes > nextBytes)
-            return toDelta(0, nextBytes)
-        return toDelta(next.timestamp - previous.timestamp, nextBytes - previousBytes)
+        return {
+            deltaTime: deltaTime,
+            deltaData: deltaData,
+            deltaDataPerSecond: deltaData.divide(deltaTime).multiply(1000)
+        }
     }
 
-    protected resultFrom(measurements: ISpeedChangeDelta[]): ISpeedCalculationResult {
+    protected calculateResult(measurements: ISpeedChangeDelta[]): ISpeedCalculationResult {
         const averageBytesPerSecond = (measurements.length < 2)
-            ? measurements[0].deltaBytesPerSecond
+            ? measurements[0].deltaDataPerSecond
             : measurements
-            .map(e => e.deltaBytesPerSecond)
-            .reduce((previous, current) => previous + current) / measurements.length
+                .map(e => e.deltaDataPerSecond)
+                .reduce((previous, current) => previous.addValue(current))
+                .divide(measurements.length)
         return {
-            success: true,
             samples: measurements.length,
-            averageBytesPerSecond: averageBytesPerSecond,
+            averagePerSecond: averageBytesPerSecond,
         }
     }
 
     async calculate(callbacks?: ISpeedCalculationCallbacks): Promise<ISpeedCalculationResult> {
         const measurements: ISpeedChangeDelta[] = []
-        const requestManager = new SpeedRequestManager()
-        let iterationCount: number = 0
-        let lastIterationDuration: number = 0
-        const startTime: number = window.performance.now()
         const calculationBuffer = new ChangeCalculationBuffer<ISpeedStateChangeEvent, ISpeedChangeDelta>(this.calculateChangeDelta)
 
-        const continueIteration: () => boolean = () =>
-            (this.configuration.parameters.maxRequests > 0 && iterationCount < this.configuration.parameters.maxRequests) // max iterations not reached
-            && ((window.performance.now() - startTime) + lastIterationDuration < this.configuration.parameters.maxDuration) // timeout unlikely
-        const remainingUntilTimeout: () => number = () =>
-            this.configuration.parameters.maxDuration - ((window.performance.now() - startTime) + lastIterationDuration)
-
-        while (continueIteration()) {
-            iterationCount++
-            const iterationStartTime = window.performance.now()
-            calculationBuffer.push({timestamp: iterationStartTime}) // prefill to resolve issues caused by too fast data transfer
-            await requestManager.performSpeedRequest({
+        return iterateTask({
+            maxIterations: this.configuration.parameters.maxRequests,
+            timeoutAfterMs: this.configuration.parameters.maxDuration,
+            iterationDelayMs: this.configuration.parameters.minDelay
+        }, async details => {
+            calculationBuffer.push({timestamp: details.iteration.startTimeCurrent}) // prefill to resolve issues caused by too fast data transfer
+            return performSpeedRequest({
                 method: this.configuration.method,
                 url: this.configuration.url,
-                timeout: remainingUntilTimeout(),
+                timeout: details.timeout.remaining!,
                 payload: this.configuration.payload
             }, (event: ISpeedStateChangeEvent) => {
                 if (event.state !== SpeedRequestState.PROGRESS)
@@ -116,21 +110,19 @@ export default class SpeedCalculation extends ACalculation<ISpeedCalculationConf
                 if (callbacks?.measurementCallbacks)
                     callbacks.measurementCallbacks.forEach(callback => callback(event))
                 const speedEventDelta = calculationBuffer.push(event)
-                if (speedEventDelta.deltaTime <= 0 || speedEventDelta.deltaBytes <= 0)
+                if (speedEventDelta.deltaTime <= 0)
                     return
                 measurements.push(speedEventDelta)
                 if (callbacks?.deltaCalculationCallbacks)
                     callbacks.deltaCalculationCallbacks.forEach(callback => callback(speedEventDelta))
             })
-            lastIterationDuration = window.performance.now() - iterationStartTime
-        }
-
-        const result = this.resultFrom(measurements)
-        if (callbacks?.resultCallbacks)
-            callbacks.resultCallbacks.forEach(callback => callback(result))
-        return new Promise((resolve) => {
-            resolve(result)
         })
+            .then(() => {
+                const result = this.calculateResult(measurements)
+                if (callbacks?.resultCallbacks)
+                    callbacks.resultCallbacks.forEach(callback => callback(result))
+                return result
+            })
     }
 
 }

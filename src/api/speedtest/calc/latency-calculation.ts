@@ -1,14 +1,16 @@
-import LatencyRequestManager, {
+import performLatencyRequest, {
     ILatencyStateChangeEvent,
     LatencyRequestMethod, LatencyRequestState, LatencyStateChangeEventCallback,
 } from "../requests/latency-request.ts";
 import {Callback} from "../../misc/callback.ts";
 import {ACalculation, ICalculationCallbacks, ICalculationConfiguration, ICalculationResult} from "./calculation.ts";
+import {iterateTask} from "../../misc/iteration/iteration.ts";
 
 export interface ILatencyCalculationConfiguration extends ICalculationConfiguration {
     method: LatencyRequestMethod
     url: string
     parameters: {
+        minDelay: number
         maxDuration: number
         maxRequests: number
     }
@@ -38,10 +40,12 @@ export function withDefaults(callbacks?: ILatencyCalculationCallbacks, message?:
     const copy: ILatencyCalculationCallbacks = callbacks ? {...callbacks} : {}
     if (!copy.measurementCallbacks)
         copy.measurementCallbacks = []
-    copy.measurementCallbacks?.push((delta) => { console.debug(message, `${delta.latency }ms `,delta) })
+    copy.measurementCallbacks?.push((delta) =>
+        console.debug(message, `${delta.latency} ms `, delta))
     if (!copy.resultCallbacks)
         copy.resultCallbacks = []
-    copy.resultCallbacks.push((result) => { console.debug(message, `${result.latency} ms +-${result.jitter} ms`, result) })
+    copy.resultCallbacks.push((result) =>
+        console.debug(message, `${result.latency} ms +-${result.jitter} ms`, result))
     return copy
 }
 
@@ -51,7 +55,8 @@ export default class LatencyCalculation extends ACalculation<ILatencyCalculation
         super(configuration)
     }
 
-    protected measurementFrom(events: ILatencyStateChangeEvent[]): ILatencyMeasurement {
+    protected calculateMeasurement(events: ILatencyStateChangeEvent[]): ILatencyMeasurement {
+
         function toMeasurement(success: boolean, latency: number): ILatencyMeasurement {
             return {
                 success: success,
@@ -71,7 +76,8 @@ export default class LatencyCalculation extends ACalculation<ILatencyCalculation
         return toMeasurement(false, -1)
     }
 
-    protected resultFrom(measurements: ILatencyMeasurement[]): ILatencyCalculationResult {
+    protected calculateResult(measurements: ILatencyMeasurement[]): ILatencyCalculationResult {
+
         function toResult(success: boolean, latency: number, jitter: number, samples: number) {
             return {
                 success: success,
@@ -94,42 +100,31 @@ export default class LatencyCalculation extends ACalculation<ILatencyCalculation
     }
 
     override async calculate(callbacks?: ILatencyCalculationCallbacks): Promise<ILatencyCalculationResult> {
-        const requestManager = new LatencyRequestManager()
-        let iterationCount: number = 0
-        let lastIterationDuration: number = 0
-        const measurements: ILatencyMeasurement[] = []
-        const startTime: number = window.performance.now()
-
-        const continueIteration: () => boolean = () =>
-            (this.configuration.parameters.maxRequests > 0 && iterationCount < this.configuration.parameters.maxRequests) // max iterations not reached
-            && ((window.performance.now() - startTime) + lastIterationDuration < this.configuration.parameters.maxDuration) // timeout unlikely
-        const remainingUntilTimeout: () => number = () =>
-            this.configuration.parameters.maxDuration - ((window.performance.now() - startTime) + lastIterationDuration)
-
-        while (continueIteration()) {
-            iterationCount++
-            const iterationStartTime = window.performance.now()
-            const latencyEvents = await requestManager.performLatencyRequest({
+        return iterateTask({
+                maxIterations: this.configuration.parameters.maxRequests,
+                timeoutAfterMs: this.configuration.parameters.maxDuration,
+                iterationDelayMs: this.configuration.parameters.minDelay
+            }, async details => performLatencyRequest({
                 method: this.configuration.method,
                 url: this.configuration.url,
-                timeout: remainingUntilTimeout()
+                timeout: details.timeout.remaining!
             }, (event: ILatencyStateChangeEvent) => {
                 if (callbacks?.stateChangeCallbacks)
                     callbacks?.stateChangeCallbacks.forEach(callback => callback(event))
+            }).then(events => {
+                console.log(events)
+                const measurement = this.calculateMeasurement(events)
+                if (callbacks?.measurementCallbacks)
+                    callbacks?.measurementCallbacks.forEach(callback => callback(measurement))
+                return measurement
             })
-            const measurement = this.measurementFrom(latencyEvents)
-            measurements.push(measurement)
-            if (callbacks?.measurementCallbacks)
-                callbacks?.measurementCallbacks.forEach(callback => callback(measurement))
-            lastIterationDuration = window.performance.now() - iterationStartTime
-        }
-
-        const result = this.resultFrom(measurements)
-        if (callbacks?.resultCallbacks)
-            callbacks?.resultCallbacks.forEach(callback => callback(result))
-        return new Promise((resolve) => {
-            resolve(result)
-        })
+        )
+            .then(measurements => {
+                const result = this.calculateResult(measurements)
+                if (callbacks?.resultCallbacks)
+                    callbacks?.resultCallbacks.forEach(callback => callback(result))
+                return result
+            })
     }
 
 }
