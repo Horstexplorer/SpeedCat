@@ -43,18 +43,6 @@ export async function iterateTask<T>(settings: IterationSettings, task: (details
         }
     }
 
-    async function iterator(results: T[] = []): Promise<T[]> {
-        iterationCount++
-        const iterationStartTime = window.performance.now()
-        return task(currentDetails()).then(result => {
-            results.push(result)
-            lastIterationDuration = window.performance.now() - iterationStartTime;
-            if (continueIteration())
-                return new Promise(resolve => setTimeout(resolve, settings.iterationDelayMs)).then(() => iterator(results))
-            return results
-        })
-    }
-
     const results: T[] = []
     while (continueIteration()) {
         iterationCount++
@@ -63,5 +51,5 @@ export async function iterateTask<T>(settings: IterationSettings, task: (details
         lastIterationDuration = window.performance.now() - iterationStartTime;
     }
 
-    return iterator()
+    return results
 }

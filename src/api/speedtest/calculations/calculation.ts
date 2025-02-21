@@ -1,10 +1,10 @@
 export interface ICalculationConfiguration {}
 
-export interface ICalculationCallbacks {}
+export interface ICalculationEventCallbacks {}
 
 export interface ICalculationResult {}
 
-export abstract class ACalculation<IConfig extends ICalculationConfiguration, ICall extends ICalculationCallbacks, IRes extends ICalculationResult> {
+export abstract class ACalculation<IConfig extends ICalculationConfiguration, ICall extends ICalculationEventCallbacks, IRes extends ICalculationResult> {
 
     protected configuration: IConfig
 

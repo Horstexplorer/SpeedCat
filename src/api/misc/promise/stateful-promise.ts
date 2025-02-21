@@ -16,17 +16,16 @@ export default class StatefulPromise<T> extends Promise<T> {
 
     constructor(executor: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) {
         super(resolve => resolve(
-            Promise.resolve().then(() => {
+            Promise.resolve().then(async () => {
                     this._state = PromiseState.STARTED
-                })
-                .then(() => new Promise<T>(executor))
-                .then(t => {
-                    this._state = PromiseState.RESOLVED
-                    return t;
-                })
-                .catch(e => {
-                    this._state = PromiseState.REJECTED
-                    throw e
+                    try {
+                        const result = await new Promise<T>(executor)
+                        this._state = PromiseState.RESOLVED
+                        return result
+                    } catch (e) {
+                        this._state = PromiseState.REJECTED
+                        throw e
+                    }
                 })
         ))
     }

@@ -1,4 +1,4 @@
-import {EventAggregator, EventCallback, IStatefulEvent} from "../../events/event.ts";
+import {EventAggregator, EventCallback, IStatefulEvent} from "../../misc/events/event.ts";
 import {
     IHttpRequest,
     IHttpRequestHandling,
@@ -14,7 +14,7 @@ export enum LatencyRequestMethod {
 export interface ILatencyRequest {
     method: LatencyRequestMethod
     url: string
-    timeout: number
+    timeout?: number
 }
 
 export enum LatencyRequestState {
@@ -28,9 +28,9 @@ export type LatencyStateChangeEventCallback = EventCallback<ILatencyStateChangeE
 
 export default function performLatencyRequest(request: ILatencyRequest, ...eventCallbacks: LatencyStateChangeEventCallback[]): Promise<ILatencyStateChangeEvent[]> {
 
-    function eventOf(state: LatencyRequestState): ILatencyStateChangeEvent {
+    function latencyStateChangeEvent(state: LatencyRequestState, timestamp: number = window.performance.now()): ILatencyStateChangeEvent {
         return {
-            timestamp: window.performance.now(),
+            timestamp: timestamp,
             state: state
         }
     }
@@ -38,25 +38,29 @@ export default function performLatencyRequest(request: ILatencyRequest, ...event
     const httpRequest: IHttpRequest = {
         method: request.method,
         url: request.url,
-        timeout: request.timeout
+        settings: {
+            timeout: request.timeout,
+            responseType: 'blob'
+        }
     }
+
     const httpRequestHandling: IHttpRequestHandling<ILatencyStateChangeEvent[], undefined> = {
         configuration: (xhr: XMLHttpRequest, resolve: (value: ILatencyStateChangeEvent[]) => void, _: (reason?: undefined) => void) => {
             const aggregator = new EventAggregator<ILatencyStateChangeEvent>(...eventCallbacks)
             xhr.addEventListener("readystatechange", () => {
                 if (xhr.readyState == XMLHttpRequest.OPENED) {
-                    aggregator.capture(eventOf(LatencyRequestState.STARTED))
+                    aggregator.capture(latencyStateChangeEvent(LatencyRequestState.STARTED))
                 }
                 if (xhr.readyState == XMLHttpRequest.DONE) {
                     if (!(xhr.status >= 200 && xhr.status < 400)) {
-                        aggregator.capture(eventOf(LatencyRequestState.FAILURE))
+                        aggregator.capture(latencyStateChangeEvent(LatencyRequestState.FAILURE))
                     }
-                    aggregator.capture(eventOf(LatencyRequestState.COMPLETED))
+                    aggregator.capture(latencyStateChangeEvent(LatencyRequestState.COMPLETED))
                     resolve(aggregator.events)
                 }
             })
-            xhr.responseType = 'blob'
         }
     }
+
     return performCustomHttpRequest(httpRequest, httpRequestHandling)
 }

@@ -1,4 +1,4 @@
-import {Callback, combineCallbacks} from "../misc/callback.ts";
+import {Callback, combineCallbacks} from "./callback.ts";
 
 export interface IEvent {
     timestamp: number

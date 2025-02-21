@@ -1,10 +1,15 @@
 export type RequestPayload = Document | XMLHttpRequestBodyInit | null
+export type ResponseType = XMLHttpRequestResponseType
 
 export interface IHttpRequest {
     method: string
     url: string
-    timeout?: number
     payload?: RequestPayload
+    settings?: {
+        headers?: Map<string, string>
+        timeout?: number
+        responseType?: ResponseType
+    }
 }
 
 export interface IHttpResponse {
@@ -20,10 +25,20 @@ export interface IHttpRequestHandling<RESOLVE, REJECT> {
 export async function performCustomHttpRequest<RESOLVE, REJECT>(requestDetails: IHttpRequest, requestHandling: IHttpRequestHandling<RESOLVE, REJECT>): Promise<RESOLVE> {
     return new Promise((resolve, reject) => {
         const xhrRequest = new XMLHttpRequest()
-        if (requestDetails.timeout)
-            xhrRequest.timeout = requestDetails.timeout
+
+        if (requestDetails.settings?.timeout)
+            xhrRequest.timeout = requestDetails.settings?.timeout
+
+        if (requestDetails.settings?.responseType)
+            xhrRequest.responseType = requestDetails.settings?.responseType
+
         requestHandling.configuration(xhrRequest, resolve, reject)
+
         xhrRequest.open(requestDetails.method, requestDetails.url, true)
+
+        if (requestDetails.settings?.headers)
+            requestDetails.settings?.headers.forEach((value, key) => xhrRequest.setRequestHeader(key, value))
+
         xhrRequest.send(requestDetails.payload)
     })
 }
@@ -32,7 +47,7 @@ export const IHttpRequestHandling_DEFAULTS: IHttpRequestHandling<IHttpResponse, 
     configuration: (xhr: XMLHttpRequest, resolve: (value: any) => void, reject: (value?: any) => void) => {
         xhr.addEventListener("readystatechange", () => {
             if (xhr.readyState == XMLHttpRequest.DONE) {
-                if (!(xhr.status >= 200 && xhr.status < 400)) {
+                if (xhr.status >= 200 && xhr.status < 400) {
                     resolve({
                         status: xhr.status,
                         statusText: xhr.statusText,

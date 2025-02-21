@@ -43,6 +43,6 @@ export class AssetConfiguration {
 }
 
 export async function fetchAssetConfiguration(): Promise<AssetConfiguration> {
-    return getAssetIndex()
-        .then(assetIndex => new AssetConfiguration(assetIndex))
+    const assetIndex = await getAssetIndex()
+    return new AssetConfiguration(assetIndex)
 }
