@@ -53,14 +53,14 @@ function latencyCalculationResultEvent(latencyCalculationResult: ILatencyCalcula
     }
 }
 
-export interface ILatencyCalculationCallbacks extends ICalculationEventCallbacks {
+export interface ILatencyCalculationEventCallbacks extends ICalculationEventCallbacks {
     stateChange?: LatencyStateChangeEventCallback
     measurement?: LatencyMeasurementEventCallback
     result?: LatencyCalculationResultEventCallback
 }
 
-export function defaultLatencyCalculationCallbacks(callbacks?: ILatencyCalculationCallbacks, message: string = "Latency") {
-    const copy: ILatencyCalculationCallbacks = callbacks ? {...callbacks} : {}
+export function defaultLatencyCalculationCallbacks(callbacks?: ILatencyCalculationEventCallbacks, message: string = "Latency") {
+    const copy: ILatencyCalculationEventCallbacks = callbacks ? {...callbacks} : {}
 
     copy.measurement = combineCallbacks(
         callbacks?.measurement,
@@ -120,13 +120,13 @@ function calculateLatencyCalculationResult(measurements: ILatencyMeasurement[]):
 }
 
 
-export default class LatencyCalculation extends ACalculation<ILatencyCalculationConfiguration, ILatencyCalculationCallbacks, ILatencyCalculationResult> {
+export default class LatencyCalculation extends ACalculation<ILatencyCalculationConfiguration, ILatencyCalculationEventCallbacks, ILatencyCalculationResult> {
 
     constructor(configuration: ILatencyCalculationConfiguration) {
         super(configuration)
     }
 
-    override async calculate(callbacks?: ILatencyCalculationCallbacks): Promise<ILatencyCalculationResult> {
+    override async calculate(callbacks?: ILatencyCalculationEventCallbacks): Promise<ILatencyCalculationResult> {
 
         const latencyMeasurements = await iterateTask({
             maxIterations: this.configuration.parameters.maxRequests,
