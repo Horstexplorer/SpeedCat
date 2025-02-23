@@ -1,6 +1,6 @@
 import {performHttpRequest} from "../misc/http/http-request.ts";
 
-export const SPEEDTEST_ASSET_ROOT = "speedtest"
+export const SPEEDTEST_ASSET_ROOT = "test-files"
 export const SPEEDTEST_ASSET_INDEX = "asset-index.json"
 
 export interface IAssetDefinition {

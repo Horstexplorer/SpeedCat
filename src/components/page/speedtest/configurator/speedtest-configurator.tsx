@@ -10,7 +10,7 @@ import InputText from "../../../input/text/input-text.tsx";
 import SaveIcon from '@mui/icons-material/Save';
 import HistoryIcon from '@mui/icons-material/History';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
-import {fetchAssetConfiguration} from "../../../../api/speedtest-assets/asset-configuration.ts";
+import {fetchAssetConfiguration} from "../../../../api/test-files/asset-configuration.ts";
 import {ISpeedtestUserConfiguration} from "../../../../api/speedtest-user-configuration/user-configuration.ts";
 import NormalInputSlider from "../../../input/normal-slider/normal-input-slider.tsx";
 import {

@@ -3,7 +3,7 @@ import {Box, Button, Grid2} from "@mui/material";
 import {useEffect, useState} from "react";
 import useUserConfigurationStore from "../../../../api/state/user-configuration-state.ts";
 import useAssetConfigurationStore from "../../../../api/state/asset-configuration-state.ts";
-import {fetchAssetConfiguration} from "../../../../api/speedtest-assets/asset-configuration.ts";
+import {fetchAssetConfiguration} from "../../../../api/test-files/asset-configuration.ts";
 import {
     buildDefaultSpeedtestUserConfiguration, buildSpeedtestConfigurationFrom
 } from "../../../../api/speedtest-user-configuration/user-configuration-builder.ts";
