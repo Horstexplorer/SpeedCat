@@ -2,7 +2,7 @@ import SpeedTest from "./speed-test.ts";
 import {SpeedRequestMethod} from "../../requests/speed-request.ts";
 
 export interface IDownloadSpeedTestConfiguration {
-    url: string,
+    url: string
     parameters: {
         minDelay: number
         maxDuration: number

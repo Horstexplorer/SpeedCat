@@ -16,11 +16,13 @@ export class DataUnit extends Unit {
 
     readonly type: DataUnitType
     readonly base: DataUnitBase
+    readonly exponent: number
 
     constructor(unit: string, unitText: string, type: DataUnitType, base: DataUnitBase, exponent: number) {
         super(`data_unit_${unit}`, unit, unitText, Math.pow(type, exponent) * base);
         this.type = type
         this.base = base
+        this.exponent = exponent
     }
 }
 

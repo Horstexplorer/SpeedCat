@@ -3,7 +3,7 @@ import SpeedTest from "./speed-test.ts";
 import {SpeedRequestMethod} from "../../requests/speed-request.ts";
 
 export interface IUploadSpeedTestConfiguration {
-    url: string,
+    url: string
     payload: RequestPayload
     parameters: {
         minDelay: number

@@ -3,8 +3,10 @@ import {
     IAssetDefinition,
     IAssetIndex
 } from "./asset-index.ts";
+import Value from "../misc/units/value.ts";
+import {DataUnit, DataUnits} from "../misc/units/types/data-units.ts";
 
-export class AssetConfiguration {
+export default class AssetConfiguration {
 
     private index: IAssetIndex
 
@@ -12,9 +14,9 @@ export class AssetConfiguration {
         this.index = index
     }
 
-    get assetWithNoPayload(): IAssetDefinition | undefined {
+    get assetsWithNoPayload(): IAssetDefinition[] {
         return this.index.assets
-            .find(asset => !asset.expected_payload_bytes || asset.expected_payload_bytes == 0)
+            .filter(asset => !asset.expected_payload_bytes || asset.expected_payload_bytes == 0)
     }
 
     get assetsWithPayload(): IAssetDefinition[] {
@@ -22,22 +24,24 @@ export class AssetConfiguration {
             .filter(asset => asset.expected_payload_bytes && asset.expected_payload_bytes > 0)
     }
 
-    assetWithPayloadCloseTo(size: number, allowedDeviation: number = 1): IAssetDefinition | undefined {
+    assetWithPayloadCloseTo(size: Value<DataUnit>, allowedDeviation: number = 1): IAssetDefinition | undefined {
+        const byteSize = Value.convert(size, DataUnits.BYTE).value
         const closestMatch = this.assetsWithPayload
             .sort((first, second) => first.expected_payload_bytes! - second.expected_payload_bytes!)
             .reduce(function (pre, cur) {
-                return (Math.abs(cur.expected_payload_bytes! - size) < Math.abs(pre.expected_payload_bytes! - size) ? cur : pre)
+                return (Math.abs(cur.expected_payload_bytes! - byteSize) < Math.abs(pre.expected_payload_bytes! - byteSize) ? cur : pre)
             })
         if (!closestMatch
-            || (size > 0 && (Math.abs(closestMatch.expected_payload_bytes! - size)/size) > allowedDeviation))
+            || (byteSize > 0 && (Math.abs(closestMatch.expected_payload_bytes! - byteSize)/byteSize) > allowedDeviation))
             return undefined
         return closestMatch
     }
 
-    getOrderedAvailablePayloadSizes(): number[] {
+    getOrderedAvailablePayloadSizes(): Value<DataUnit>[] {
         return this.assetsWithPayload
             .map(asset => asset.expected_payload_bytes!)
             .sort((first, second) => first - second)
+            .map(value => new Value(value, DataUnits.BYTE))
     }
 
 }

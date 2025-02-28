@@ -56,4 +56,12 @@ export default class Value<U extends Unit> {
         )
     }
 
+    equals(value: number): boolean {
+        return this.value == value
+    }
+
+    equalsValue(value: Value<U>): boolean {
+        return this.equals(Value.convert(value, this.unit).value)
+    }
+
 }
