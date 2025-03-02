@@ -1,7 +1,7 @@
 import "./content.scss"
-import {Box} from "@mui/material";
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import SpeedtestPage from "./speedtest/page/speedtest-page.tsx";
+import {Box} from "@mui/material"
+import {BrowserRouter, Route, Routes} from "react-router-dom"
+import SpeedtestPage from "./speedtest/page/speedtest-page.tsx"
 
 export default function Content() {
 

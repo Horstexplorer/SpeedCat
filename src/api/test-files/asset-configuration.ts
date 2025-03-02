@@ -2,9 +2,9 @@ import {
     getAssetIndex,
     IAssetDefinition,
     IAssetIndex
-} from "./asset-index.ts";
-import Value from "../misc/units/value.ts";
-import {DataUnit, DataUnits} from "../misc/units/types/data-units.ts";
+} from "./asset-index.ts"
+import Value from "../misc/units/value.ts"
+import {DataUnit, DataUnits} from "../misc/units/types/data-units.ts"
 
 export default class AssetConfiguration {
 
@@ -22,12 +22,12 @@ export default class AssetConfiguration {
     get assetsWithPayload(): IAssetDefinition[] {
         return this.index.assets
             .filter(asset => asset.expected_payload_bytes && asset.expected_payload_bytes > 0)
+            .sort((first, second) => (first.expected_payload_bytes || 0) - (second.expected_payload_bytes || 0))
     }
 
     assetWithPayloadCloseTo(size: Value<DataUnit>, allowedDeviation: number = 1): IAssetDefinition | undefined {
         const byteSize = Value.convert(size, DataUnits.BYTE).value
         const closestMatch = this.assetsWithPayload
-            .sort((first, second) => first.expected_payload_bytes! - second.expected_payload_bytes!)
             .reduce(function (pre, cur) {
                 return (Math.abs(cur.expected_payload_bytes! - byteSize) < Math.abs(pre.expected_payload_bytes! - byteSize) ? cur : pre)
             })
@@ -37,10 +37,9 @@ export default class AssetConfiguration {
         return closestMatch
     }
 
-    getOrderedAvailablePayloadSizes(): Value<DataUnit>[] {
+    get availablePayloadSizes(): Value<DataUnit>[] {
         return this.assetsWithPayload
             .map(asset => asset.expected_payload_bytes!)
-            .sort((first, second) => first - second)
             .map(value => new Value(value, DataUnits.BYTE))
     }
 

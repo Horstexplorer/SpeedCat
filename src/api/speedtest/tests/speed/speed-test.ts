@@ -1,9 +1,9 @@
-import ATest from "../../../misc/test/test.ts";
+import ATest from "../../../misc/test/test.ts"
 import SpeedCalculation, {
     ISpeedCalculationConfiguration,
     ISpeedCalculationEventCallbacks,
     ISpeedCalculationResult
-} from "../../calculations/speed-calculation.ts";
+} from "../../calculations/speed-calculation.ts"
 
 export type ISpeedTestConfiguration = ISpeedCalculationConfiguration
 export type ISpeedTestInput = ISpeedCalculationEventCallbacks
@@ -21,7 +21,7 @@ export default class SpeedTest extends ATest<ISpeedTestConfiguration, ISpeedTest
                     `Test method: ${speedTestConfiguration.method}, Endpoint: ${speedTestConfiguration.url}`
             },
             testSetupConfiguration: speedTestConfiguration
-        });
+        })
 
         this.calculation = new SpeedCalculation(speedTestConfiguration)
     }

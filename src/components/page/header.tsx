@@ -1,10 +1,10 @@
 import "./header.scss"
-import {AppBar, Box, Drawer, IconButton, Toolbar, Typography} from "@mui/material";
-import {useState} from "react";
-import SettingsIcon from "@mui/icons-material/Settings";
-import CloseIcon from "@mui/icons-material/Close";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import SpeedtestConfigurator from "./speedtest/configurator/speedtest-configurator.tsx";
+import {AppBar, Box, Drawer, IconButton, Toolbar, Typography} from "@mui/material"
+import {useState} from "react"
+import SettingsIcon from "@mui/icons-material/Settings"
+import CloseIcon from "@mui/icons-material/Close"
+import GitHubIcon from "@mui/icons-material/GitHub"
+import SpeedtestConfigurator from "./speedtest/configurator/speedtest-configurator.tsx"
 
 export default function Header() {
 

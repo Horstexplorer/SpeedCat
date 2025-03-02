@@ -56,7 +56,7 @@ export default abstract class ATest<TEST_SETUP_CONFIG,  TEST_RUN_INPUT, TEST_RUN
 
         const startTime = window.performance.now()
 
-        let executionResult;
+        let executionResult
 
         if (testInput?.controls?.skip)
             executionResult = testExecutionResult(TestResultState.SKIPPED, undefined, startTime, window.performance.now() - startTime)

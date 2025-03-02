@@ -1,6 +1,6 @@
 import "./input-slider.scss"
-import {Slider} from "@mui/material";
-import {Mark} from "@mui/material/Slider/useSlider.types";
+import {Slider} from "@mui/material"
+import {Mark} from "@mui/material/Slider/useSlider.types"
 
 export interface InputSliderProperties {
     id?: string

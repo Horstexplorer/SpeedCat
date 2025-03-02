@@ -1,5 +1,5 @@
-import Unit from "../unit.ts";
-import Value from "../value.ts";
+import Unit from "../unit.ts"
+import Value from "../value.ts"
 
 export enum DataUnitType {
     BASE = 1,
@@ -19,7 +19,7 @@ export class DataUnit extends Unit {
     readonly exponent: number
 
     constructor(unit: string, unitText: string, type: DataUnitType, base: DataUnitBase, exponent: number) {
-        super(`data_unit_${unit}`, unit, unitText, Math.pow(type, exponent) * base);
+        super(`data_unit_${unit}`, unit, unitText, Math.pow(type, exponent) * base)
         this.type = type
         this.base = base
         this.exponent = exponent

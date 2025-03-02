@@ -3,15 +3,15 @@ import {
     ICalculationConfiguration,
     ICalculationEventCallbacks,
     ICalculationResult
-} from "./calculation.ts";
+} from "./calculation.ts"
 import performLatencyRequest, {
     ILatencyStateChangeEvent,
     LatencyRequestMethod, LatencyRequestState,
     LatencyStateChangeEventCallback
-} from "../requests/latency-request.ts";
-import {EventCallback, IEvent} from "../../misc/events/event.ts";
-import {combineCallbacks} from "../../misc/events/callback.ts";
-import {iterateTask} from "../../misc/iteration/iteration.ts";
+} from "../requests/latency-request.ts"
+import {EventCallback, IEvent} from "../../misc/events/event.ts"
+import {combineCallbacks} from "../../misc/events/callback.ts"
+import {iterateTask} from "../../misc/iteration/iteration.ts"
 
 export interface ILatencyCalculationConfiguration extends ICalculationConfiguration {
     method: LatencyRequestMethod

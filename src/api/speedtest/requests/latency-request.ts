@@ -1,9 +1,9 @@
-import {EventAggregator, EventCallback, IStatefulEvent} from "../../misc/events/event.ts";
+import {EventAggregator, EventCallback, IStatefulEvent} from "../../misc/events/event.ts"
 import {
     IHttpRequest,
     IHttpRequestHandling,
     performCustomHttpRequest
-} from "../../misc/http/http-request.ts";
+} from "../../misc/http/http-request.ts"
 
 export enum LatencyRequestMethod {
     PREFLIGHT = 'OPTIONS',

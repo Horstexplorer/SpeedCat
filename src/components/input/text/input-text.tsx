@@ -1,6 +1,6 @@
 import "./input-text.scss"
-import {TextField} from "@mui/material";
-import * as React from "react";
+import {TextField} from "@mui/material"
+import * as React from "react"
 
 export interface InputTextProperties {
     id?: string

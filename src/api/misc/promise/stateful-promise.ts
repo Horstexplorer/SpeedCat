@@ -9,7 +9,7 @@ export enum PromiseState {
 export default class StatefulPromise<T> extends Promise<T> {
 
     static get [Symbol.species]() {
-        return Promise;
+        return Promise
     }
 
     private _state: PromiseState = PromiseState.UNKNOWN

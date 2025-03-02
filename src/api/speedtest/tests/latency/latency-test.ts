@@ -1,9 +1,9 @@
-import ATest from "../../../misc/test/test.ts";
+import ATest from "../../../misc/test/test.ts"
 import LatencyCalculation, {
     ILatencyCalculationEventCallbacks,
     ILatencyCalculationConfiguration,
     ILatencyCalculationResult
-} from "../../calculations/latency-calculation.ts";
+} from "../../calculations/latency-calculation.ts"
 
 export type ILatencyTestConfiguration = ILatencyCalculationConfiguration
 export type ILatencyTestInput = ILatencyCalculationEventCallbacks
@@ -21,7 +21,7 @@ export default class LatencyTest extends ATest<ILatencyTestConfiguration, ILaten
                     `Test method: ${latencyTestConfiguration.method}, Endpoint: ${latencyTestConfiguration.url}`
             },
             testSetupConfiguration: latencyTestConfiguration
-        });
+        })
 
         this.calculation = new LatencyCalculation(latencyTestConfiguration)
     }

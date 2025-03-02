@@ -1,6 +1,6 @@
 import "./plot-display.scss"
-import {Area, AreaChart, CartesianGrid, ResponsiveContainer} from "recharts";
-import {Box, Grid2, Paper} from "@mui/material";
+import {Area, AreaChart, CartesianGrid, ResponsiveContainer} from "recharts"
+import {Box, Grid2, Paper} from "@mui/material"
 
 export interface IPlotDisplayProperties {
     id?: string

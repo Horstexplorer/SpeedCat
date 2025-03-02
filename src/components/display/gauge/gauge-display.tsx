@@ -1,6 +1,6 @@
 import "./gauge-display.scss"
-import {Box, Paper} from "@mui/material";
-import {Cell, Pie, PieChart, ResponsiveContainer} from "recharts";
+import {Box, Paper} from "@mui/material"
+import {Cell, Pie, PieChart, ResponsiveContainer} from "recharts"
 
 export interface IDisplayGaugeProperties {
     id?: string

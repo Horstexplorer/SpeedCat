@@ -1,5 +1,5 @@
 import "./input-select.scss"
-import {MenuItem, Select, SelectChangeEvent, Typography} from "@mui/material";
+import {MenuItem, Select, SelectChangeEvent, Typography} from "@mui/material"
 
 export interface InputSelectProperties {
     id?: string

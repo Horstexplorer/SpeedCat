@@ -1,4 +1,4 @@
-import Unit from "./unit.ts";
+import Unit from "./unit.ts"
 
 export default class Value<U extends Unit> {
     readonly value: number

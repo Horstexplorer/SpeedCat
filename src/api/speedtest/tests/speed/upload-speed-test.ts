@@ -1,6 +1,6 @@
-import {RequestPayload} from "../../../misc/http/http-request.ts";
-import SpeedTest from "./speed-test.ts";
-import {SpeedRequestMethod} from "../../requests/speed-request.ts";
+import {RequestPayload} from "../../../misc/http/http-request.ts"
+import SpeedTest from "./speed-test.ts"
+import {SpeedRequestMethod} from "../../requests/speed-request.ts"
 
 export interface IUploadSpeedTestConfiguration {
     url: string
@@ -18,7 +18,7 @@ export default class UploadSpeedTest extends SpeedTest {
         super({
             ...uploadSpeedTestConfiguration,
             method: SpeedRequestMethod.UPLOAD
-        });
+        })
     }
 
 }

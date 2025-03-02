@@ -3,20 +3,20 @@ import {
     ICalculationConfiguration,
     ICalculationEventCallbacks,
     ICalculationResult
-} from "./calculation.ts";
+} from "./calculation.ts"
 import performSpeedRequest, {
     ISpeedStateChangeEvent,
     SpeedRequestMethod,
     SpeedRequestState,
     SpeedStateChangeEventCallback
-} from "../requests/speed-request.ts";
-import {RequestPayload} from "../../misc/http/http-request.ts";
-import Value from "../../misc/units/value.ts";
-import {DataUnit, DataUnitBase, DataUnits, DataUnitType} from "../../misc/units/types/data-units.ts";
-import {EventCallback, IEvent} from "../../misc/events/event.ts";
-import {combineCallbacks} from "../../misc/events/callback.ts";
-import {iterateTask} from "../../misc/iteration/iteration.ts";
-import {ChangeCalculationBuffer} from "../../misc/change-buffer.ts";
+} from "../requests/speed-request.ts"
+import {RequestPayload} from "../../misc/http/http-request.ts"
+import Value from "../../misc/units/value.ts"
+import {DataUnit, DataUnitBase, DataUnits, DataUnitType} from "../../misc/units/types/data-units.ts"
+import {EventCallback, IEvent} from "../../misc/events/event.ts"
+import {combineCallbacks} from "../../misc/events/callback.ts"
+import {iterateTask} from "../../misc/iteration/iteration.ts"
+import {ChangeCalculationBuffer} from "../../misc/change-buffer.ts"
 
 export interface ISpeedCalculationConfiguration extends ICalculationConfiguration {
     method: SpeedRequestMethod
@@ -93,7 +93,7 @@ function calculateChangeDelta(previous: ISpeedStateChangeEvent | undefined, next
 function calculateSpeedCalculationResult(changeDeltas: ISpeedChangeDelta[]): ISpeedCalculationResult {
     const totalTime = changeDeltas
         .map(changeDelta => changeDelta.deltaTime)
-        .reduce((previous, current) => previous + current, 0);
+        .reduce((previous, current) => previous + current, 0)
     const averageDataPerSecond = changeDeltas
         .map(change => change.dataPerSecond.multiply(change.deltaTime).divide(totalTime))
         .reduce((previous, current) => previous.addValue(current))

@@ -1,5 +1,5 @@
-import SpeedTest from "./speed-test.ts";
-import {SpeedRequestMethod} from "../../requests/speed-request.ts";
+import SpeedTest from "./speed-test.ts"
+import {SpeedRequestMethod} from "../../requests/speed-request.ts"
 
 export interface IDownloadSpeedTestConfiguration {
     url: string
@@ -16,7 +16,7 @@ export default class DownloadSpeedTest extends SpeedTest {
         super({
             ...downloadSpeedTestConfiguration,
             method: SpeedRequestMethod.DOWNLOAD
-        });
+        })
     }
 
 }

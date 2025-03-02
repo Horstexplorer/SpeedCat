@@ -1,5 +1,5 @@
 import "./input-switch.scss"
-import {Switch} from "@mui/material";
+import {Switch} from "@mui/material"
 
 export interface IInputSwitchProperties {
     id?: string

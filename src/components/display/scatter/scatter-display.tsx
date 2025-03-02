@@ -1,6 +1,6 @@
 import "./scatter-display.scss"
-import {Box, Grid2, Paper} from "@mui/material";
-import {CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, XAxis, YAxis} from "recharts";
+import {Box, Grid2, Paper} from "@mui/material"
+import {CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, XAxis, YAxis} from "recharts"
 
 export interface IScatterDisplayProperties {
     id?: string

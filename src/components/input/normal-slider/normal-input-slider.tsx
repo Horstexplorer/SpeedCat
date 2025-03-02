@@ -1,6 +1,6 @@
 import "./normal-input-slider.scss"
-import {Mark} from "@mui/material/Slider/useSlider.types";
-import InputSlider from "../slider/input-slider.tsx";
+import {Mark} from "@mui/material/Slider/useSlider.types"
+import InputSlider from "../slider/input-slider.tsx"
 
 export interface NonLinearSliderProperties {
     id?: string

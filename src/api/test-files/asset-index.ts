@@ -1,6 +1,6 @@
-import {performHttpRequest} from "../misc/http/http-request.ts";
-import Value from "../misc/units/value.ts";
-import {DataUnit, DataUnits} from "../misc/units/types/data-units.ts";
+import {performHttpRequest} from "../misc/http/http-request.ts"
+import Value from "../misc/units/value.ts"
+import {DataUnit, DataUnits} from "../misc/units/types/data-units.ts"
 
 export const ASSET_ROOT = "test-files"
 export const ASSET_INDEX = "asset-index.json"

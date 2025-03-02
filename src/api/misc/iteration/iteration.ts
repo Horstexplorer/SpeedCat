@@ -19,7 +19,7 @@ export interface IterationDetails {
 
 export async function iterateTask<T>(settings: IterationSettings, task: (details: IterationDetails) => Promise<T>): Promise<T[]> {
     if (!settings.timeoutAfterMs && !settings.maxIterations)
-        throw Error("No iteration constrains set - Either timeout or maxIterations required.");
+        throw Error("No iteration constrains set - Either timeout or maxIterations required.")
 
     const startTime: number = window.performance.now()
     let iterationCount: number = 0
@@ -48,7 +48,7 @@ export async function iterateTask<T>(settings: IterationSettings, task: (details
         iterationCount++
         const iterationStartTime = window.performance.now()
         results.push(await task(currentDetails()))
-        lastIterationDuration = window.performance.now() - iterationStartTime;
+        lastIterationDuration = window.performance.now() - iterationStartTime
     }
 
     return results

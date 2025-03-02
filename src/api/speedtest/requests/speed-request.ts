@@ -1,12 +1,12 @@
-import {EventAggregator, EventCallback, IStatefulEvent} from "../../misc/events/event.ts";
+import {EventAggregator, EventCallback, IStatefulEvent} from "../../misc/events/event.ts"
 import {
     IHttpRequest,
     IHttpRequestHandling,
     performCustomHttpRequest,
     RequestPayload
-} from "../../misc/http/http-request.ts";
-import {DataUnit, DataUnits} from "../../misc/units/types/data-units.ts";
-import Value from "../../misc/units/value.ts";
+} from "../../misc/http/http-request.ts"
+import {DataUnit, DataUnits} from "../../misc/units/types/data-units.ts"
+import Value from "../../misc/units/value.ts"
 
 export enum SpeedRequestMethod {
     DOWNLOAD = 'GET',
