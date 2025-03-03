@@ -2,12 +2,12 @@ import {create} from 'zustand'
 import {createJSONStorage, persist} from "zustand/middleware"
 import deepmerge from "deepmerge"
 import {LatencyRequestMethod} from "../../api/speedtest/requests/latency-request.ts"
-import useAssetConfigurationStore from "./asset-configuration-state.ts"
-import {getPathToAsset} from "../../api/test-files/asset-index.ts"
+import useTestFileConfigurationStore from "./test-file-configuration-state.ts"
+import {ITestFileDefinition} from "../../api/test-files/test-file-definition.ts";
 
 export interface ILatencyTestState {
-    method: LatencyRequestMethod,
-    url?: string
+    enabled: boolean
+    method: LatencyRequestMethod
     parameters: {
         minDelay: number
         maxDuration: number
@@ -16,8 +16,8 @@ export interface ILatencyTestState {
 }
 
 export const latencyTestStateDefaults: ILatencyTestState = {
+    enabled: true,
     method: LatencyRequestMethod.HEAD,
-    url: undefined,
     parameters: {
         minDelay: 100,
         maxDuration: 5_000,
@@ -26,8 +26,10 @@ export const latencyTestStateDefaults: ILatencyTestState = {
 }
 
 export interface ILatencyTestStateActions {
+    setEnabled: (enabled: boolean) => void
     setMethod: (method: LatencyRequestMethod) => void
     setParameters: (minDelay: number | undefined, maxDuration: number | undefined, maxRequests: number | undefined) => void
+    resolveTestFileDefinition: () => ITestFileDefinition | undefined
 }
 
 export interface ILatencyTestStoreControls {
@@ -46,6 +48,7 @@ const useLatencyTestStore = create<ILatencyTestStore>()(
         (set, get) => ({
             ...latencyTestStateDefaults,
             _actions: {
+                setEnabled: value => set({...get(), enabled: value}),
                 setMethod: value => set({...get(), method: value}),
                 setParameters: (minDelay, maxDuration, maxRequests) => {
                     const parameters = {...get().parameters}
@@ -56,27 +59,27 @@ const useLatencyTestStore = create<ILatencyTestStore>()(
                     if (maxRequests)
                         parameters.maxRequests = maxRequests
                     set({...get(), parameters: parameters})
+                },
+                resolveTestFileDefinition: () => {
+                    const currentState = get()
+                    if (currentState._ctrl.readyToBeUsed)
+                        return undefined
+                    const testFileStoreState = useTestFileConfigurationStore.getState()
+                    if (!testFileStoreState._ctrl.readyToBeUsed)
+                        return undefined
+                    return testFileStoreState.testFileConfiguration?.noDataDefinitions[0]
                 }
             },
             _ctrl: {
                 readyToBeUsed: false,
                 bootstrap: async () => {
                     const currentState = get()
-                    const assetStore = useAssetConfigurationStore
-                    if (!assetStore.getState()._ctrl.readyToBeUsed)
-                        return assetStore.getState()._ctrl.bootstrap().then(() => currentState._ctrl.bootstrap())
-                    const assetConfig = assetStore.getState().assetConfiguration!
-                    // load additional defaults
-                    if (!currentState.url) {
-                        const assetWithoutPayload = assetConfig.assetsWithNoPayload[0]
-                        set({...get(), url: getPathToAsset(assetWithoutPayload)})
-                        return currentState._ctrl.bootstrap()
-                    }
-                    // validate state
-                    if (!assetConfig.assetsWithNoPayload.find(asset => getPathToAsset(asset) == currentState.url)) {
-                        currentState._ctrl.resetState()
-                        return currentState._ctrl.bootstrap()
-                    }
+                    if (currentState._ctrl.readyToBeUsed)
+                        return
+                    const testFileStoreState = useTestFileConfigurationStore.getState()
+                    if (!testFileStoreState._ctrl.readyToBeUsed)
+                        return testFileStoreState._ctrl.bootstrap().then(() => currentState._ctrl.bootstrap())
+
                     set({...get(), _ctrl: {...get()._ctrl, readyToBeUsed: true}})
                 },
                 resetState: state => {
@@ -90,8 +93,8 @@ const useLatencyTestStore = create<ILatencyTestStore>()(
             storage: createJSONStorage(() => localStorage),
             partialize: state => {
                 return {
+                    enabled: state.enabled,
                     method: state.method,
-                    url: state.url,
                     parameters: {
                         minDelay: state.parameters.minDelay,
                         maxDuration: state.parameters.maxDuration,

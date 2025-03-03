@@ -2,6 +2,7 @@ import {create} from 'zustand'
 import {createJSONStorage, persist} from "zustand/middleware"
 import {DataUnit, DataUnitBase, DataUnits, DataUnitType} from "../../api/misc/units/types/data-units.ts"
 import deepmerge from "deepmerge"
+import Value from "../../api/misc/units/value.ts";
 
 export interface IDataUnitState {
     base: DataUnitBase
@@ -19,6 +20,7 @@ export interface IDataUnitStateActions {
     setBase: (value: DataUnitBase) => void
     setType: (value: DataUnitType) => void
     setUnit: (value?: DataUnit) => void
+    convert: (value: Value<DataUnit>) => Value<DataUnit>
 }
 
 export interface IDataUnitStoreControls {
@@ -37,18 +39,15 @@ const useDataUnitStore = create<IDataUnitStore>()(
             _actions: {
                 setBase: value => {
                     const newUnit = DataUnits.values()
-                        .find(dataUnit => get().unit
-                            && dataUnit.type == get().type
-                            && dataUnit.base == value
-                            && dataUnit.exponent == get().unit?.exponent)
+                        .filter(dataUnit => dataUnit.base == value && dataUnit.type == get().type)
+                        .find(dataUnit => dataUnit.exponent == get().unit?.exponent)
+                    console.log(value, newUnit, get().unit?.exponent)
                     set({...get(), base: value, unit: newUnit})
                 },
                 setType: value => {
                     const newUnit = DataUnits.values()
-                        .find(dataUnit => get().unit
-                            && dataUnit.type == value
-                            && dataUnit.base == get().base
-                            && dataUnit.exponent == get().unit?.exponent)
+                        .filter(dataUnit => dataUnit.base == get().base && dataUnit.type == value)
+                        .find(dataUnit => dataUnit.exponent == get().unit?.exponent)
                     set({...get(), type: value, unit: newUnit})
                 },
                 setUnit: value => {
@@ -59,6 +58,9 @@ const useDataUnitStore = create<IDataUnitStore>()(
                         unit: value
                     })
                 },
+                convert: value => {
+                    return Value.convert(value, get().unit!)
+                }
             },
             _ctrl: {
                 resetState: state => {

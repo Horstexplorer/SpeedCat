@@ -1,5 +1,8 @@
 .input-slider {
 
+  width: auto !important;
+  margin-bottom: 1.5rem !important;
+
   & .MuiSlider-markLabel[style='left: 0%;'] {
     transform: translateX(0);
   }

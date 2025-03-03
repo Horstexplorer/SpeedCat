@@ -1,51 +1,32 @@
 import "./speedtest-page.scss"
 import {Box, Button, Grid2} from "@mui/material"
-import {useEffect} from "react"
-import useAssetConfigurationStore from "../../../../state/configuration/asset-configuration-state.ts"
+import useTestFileConfigurationStore from "../../../../state/configuration/test-file-configuration-state.ts"
+import useDataUnitStore from "../../../../state/configuration/data-unit-state.ts";
+import useLatencyTestStore from "../../../../state/configuration/latency-test-state.ts";
+import useDownloadSpeedTestStore from "../../../../state/configuration/download-speed-test-state.ts";
+import useUploadSpeedTestStore from "../../../../state/configuration/upload-speed-test-state.ts";
 
 export default function SpeedtestPage() {
 
-    // const {assetConfiguration, setAssetConfiguration} = useAssetConfigurationStore()
-    // const {userTestConfiguration, saveUserTestConfiguration} = useUserConfigurationStore()
-    // const [speedtest, setSpeedtest] = useState<Speedtest>()
-    // const [readyToRender, setReadyToRender] = useState<boolean>(false)
-    //
-    // useEffect(() => {
-    //     if (!assetConfiguration) {
-    //         fetchAssetConfiguration().then(config => setAssetConfiguration(config))
-    //     } else if (!userTestConfiguration) {
-    //         saveUserTestConfiguration(buildDefaultSpeedtestUserConfiguration(assetConfiguration))
-    //     } else {
-    //         setSpeedtest(new Speedtest(buildSpeedtestConfigurationFrom(assetConfiguration, userTestConfiguration), withDefaults(getSpeedtestCallbacks())))
-    //         setReadyToRender(true)
-    //     }
-    // }, [assetConfiguration, userTestConfiguration, readyToRender])
-    //
-    // function getSpeedtestCallbacks(): ISpeedtestCallbacks {
-    //     return {
-    //         latency: {
-    //             preHook: _ => userTestConfiguration!.latency.enabled,
-    //             test: {
-    //                 measurementCallbacks: [data => handleLatencyMeasurement(data)],
-    //                 resultCallbacks: [data => handleLatencyResult(data)]
-    //             }
-    //         },
-    //         download: {
-    //             preHook: _ => userTestConfiguration!.download.enabled,
-    //             test: {
-    //                 deltaCalculationCallbacks: [data => handleDownloadMeasurement(data)],
-    //                 resultCallbacks: [data => handleDownloadResult(data)]
-    //             }
-    //         },
-    //         upload: {
-    //             preHook: _ => userTestConfiguration!.upload.enabled,
-    //             test: {
-    //                 deltaCalculationCallbacks: [data => handleUploadMeasurement(data)],
-    //                 resultCallbacks: [data => handleUploadResult(data)]
-    //             }
-    //         }
-    //     }
-    // }
+    const {base: unitBase, type: unitType, unit, _actions: unitActions, _ctrl: unitControls} = useDataUnitStore()
+
+    const {testFileConfiguration, _ctrl: assetCtrl} = useTestFileConfigurationStore()
+    if (!assetCtrl.readyToBeUsed)
+        throw assetCtrl.bootstrap()
+
+    const {enabled: latencyEnabled, parameters: latencyParameters, _actions: latencyActions, _ctrl: latencyControls} = useLatencyTestStore()
+    if (!latencyControls.readyToBeUsed)
+        throw latencyControls.bootstrap()
+
+    const {enabled: downloadEnabled, payloadSize: downloadSize, parameters: downloadParameters, _actions: downloadActions, _ctrl: downloadControls} = useDownloadSpeedTestStore()
+    if (!downloadControls.readyToBeUsed)
+        throw downloadControls.bootstrap()
+
+    const {enabled: uploadEnabled, payloadSize: uploadSize, parameters: uploadParameters, _actions: uploadActions, _ctrl: uploadControls} = useUploadSpeedTestStore()
+    if (!uploadControls.readyToBeUsed)
+        throw uploadControls.bootstrap()
+
+
     //
     // const [testIsRunning, setTestRunning] = useState<boolean>(false)
     // const [gaugeValue, setGaugeValue] = useState<number | undefined>()

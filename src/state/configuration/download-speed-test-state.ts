@@ -1,14 +1,14 @@
 import {create} from 'zustand'
 import {createJSONStorage, persist} from "zustand/middleware"
 import deepmerge from "deepmerge"
-import useAssetConfigurationStore from "./asset-configuration-state.ts"
+import useTestFileConfigurationStore from "./test-file-configuration-state.ts"
 import Value from "../../api/misc/units/value.ts"
 import {DataUnit, DataUnits} from "../../api/misc/units/types/data-units.ts"
-import {getDataSizeOfAsset, getPathToAsset} from "../../api/test-files/asset-index.ts"
+import {ITestFileDefinition} from "../../api/test-files/test-file-definition.ts";
 
 export interface IDownloadSpeedTestState {
-    url?: string,
-    payloadSize?: Value<DataUnit>,
+    enabled: boolean
+    payloadSize?: Value<DataUnit>
     parameters: {
         minDelay: number
         maxDuration: number
@@ -17,7 +17,7 @@ export interface IDownloadSpeedTestState {
 }
 
 export const downloadSpeedTestStateDefaults: IDownloadSpeedTestState = {
-    url: undefined,
+    enabled: true,
     payloadSize: undefined,
     parameters: {
         minDelay: 0,
@@ -27,8 +27,10 @@ export const downloadSpeedTestStateDefaults: IDownloadSpeedTestState = {
 }
 
 export interface IDownloadSpeedTestStateActions {
+    setEnabled: (enabled: boolean) => void
     setPayloadSize: (payloadSize: Value<DataUnit>) => void
     setParameters: (minDelay: number | undefined, maxDuration: number | undefined, maxRequests: number | undefined) => void
+    resolveTestFileDefinition: () => ITestFileDefinition | undefined
 }
 
 export interface IDownloadSpeedTestStoreControls {
@@ -47,16 +49,8 @@ const useDownloadSpeedTestStore = create<IDownloadSpeedTestStore>()(
         (set, get) => ({
             ...downloadSpeedTestStateDefaults,
             _actions: {
-                setPayloadSize: value => {
-                    const assetStore = useAssetConfigurationStore
-                    if (!assetStore.getState()._ctrl.readyToBeUsed)
-                        return
-                    const assetConfig = assetStore.getState().assetConfiguration!
-                    const asset = assetConfig.assetWithPayloadCloseTo(value)
-                    if (!asset)
-                        return
-                    set({...get(), url: getPathToAsset(asset), payloadSize: getDataSizeOfAsset(asset)})
-                },
+                setEnabled: value => set({...get(), enabled: value}),
+                setPayloadSize: value => set({...get(), payloadSize: value}),
                 setParameters: (minDelay, maxDuration, maxRequests) => {
                     const parameters = {...get().parameters}
                     if (minDelay)
@@ -66,27 +60,44 @@ const useDownloadSpeedTestStore = create<IDownloadSpeedTestStore>()(
                     if (maxRequests)
                         parameters.maxRequests = maxRequests
                     set({...get(), parameters: parameters})
+                },
+                resolveTestFileDefinition: () => {
+                    const currentState = get()
+                    if (currentState._ctrl.readyToBeUsed)
+                        return undefined
+                    const testFileStoreState = useTestFileConfigurationStore.getState()
+                    if (!testFileStoreState._ctrl.readyToBeUsed)
+                        return undefined
+                    return testFileStoreState.testFileConfiguration?.dataDefinitions
+                        .find(definition => Value.convert(currentState.payloadSize!, DataUnits.BYTE).equals(definition.byteSize!))
                 }
             },
             _ctrl: {
                 readyToBeUsed: false,
                 bootstrap: async () => {
                     const currentState = get()
-                    const assetStore = useAssetConfigurationStore
-                    if (!assetStore.getState()._ctrl.readyToBeUsed)
-                        return assetStore.getState()._ctrl.bootstrap().then(() => currentState._ctrl.bootstrap())
-                    const assetConfig = assetStore.getState().assetConfiguration!
-                    // load additional defaults
-                    if (!currentState.payloadSize || !currentState.url) {
-                        const asset = assetConfig.assetsWithPayload[0]
-                        set({...get(), url: getPathToAsset(asset), payloadSize: getDataSizeOfAsset(asset)})
-                    }
-                    // validate
-                    if (!assetConfig.assetsWithPayload.find(asset => getPathToAsset(asset) == currentState.url
-                        && getDataSizeOfAsset(asset).equalsValue(currentState.payloadSize!))) {
-                        currentState._ctrl.resetState()
+                    if (currentState._ctrl.readyToBeUsed)
+                        return
+                    const testFileStoreState = useTestFileConfigurationStore.getState()
+                    if (!testFileStoreState._ctrl.readyToBeUsed)
+                        return testFileStoreState._ctrl.bootstrap().then(() => currentState._ctrl.bootstrap())
+                    const assetConfig = testFileStoreState.testFileConfiguration!
+                    if (!currentState.payloadSize) {
+                        const asset = assetConfig.dataDefinitions
+                            .find(definition => definition.flags?.selectable && definition.flags.default)
+                        const size = new Value(asset!.byteSize!, DataUnits.BYTE)
+                        set({...get(), payloadSize: size})
                         return currentState._ctrl.bootstrap()
+                    } else {
+                        const byteSize = Value.convert(currentState.payloadSize, DataUnits.BYTE).value
+                        const asset = assetConfig.dataDefinitions
+                            .find(definition => definition.flags?.selectable && definition.flags.default && definition.byteSize == byteSize)
+                        if (!asset) {
+                            currentState._ctrl.resetState()
+                            return currentState._ctrl.bootstrap()
+                        }
                     }
+
                     set({...get(), _ctrl: {...get()._ctrl, readyToBeUsed: true}})
                 },
                 resetState: state => {
@@ -101,7 +112,8 @@ const useDownloadSpeedTestStore = create<IDownloadSpeedTestStore>()(
                 reviver: (key, value) => {
                     if (key == 'payloadSize' && value) {
                         const valueJson = value as {value: number, uid: string}
-                        return new Value(valueJson.value, DataUnits.values().find(unit => unit.uid == valueJson.uid)!)
+                        const dataValue = new Value(valueJson.value, DataUnits.values().find(unit => unit.uid == valueJson.uid)!)
+                        return Value.convert(dataValue, DataUnits.BYTE)
                     }
                     return value
                 },
@@ -113,7 +125,7 @@ const useDownloadSpeedTestStore = create<IDownloadSpeedTestStore>()(
             }),
             partialize: state => {
                 return {
-                    url: state.url,
+                    enabled: state.enabled,
                     payloadSize: state.payloadSize,
                     parameters: {
                         minDelay: state.parameters.minDelay,

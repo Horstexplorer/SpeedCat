@@ -8,6 +8,6 @@ createRoot(document.getElementById('root')!).render(
     <>
         <CssBaseline/>
         <Header/>
-        {/*<Content/>*/}
+        <Content/>
     </>
 )

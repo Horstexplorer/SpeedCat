@@ -1,0 +1,40 @@
+{
+  "testFiles": [
+    {
+      "path": "test-files/0-mibibytes",
+      "byteSize": 0,
+      "flags": {
+        "default": true
+      }
+    },
+    {
+      "path": "test-files/25-mibibytes",
+      "byteSize": 26214400,
+      "flags": {
+        "selectable": true
+      }
+    },
+    {
+      "path": "test-files/50-mibibytes",
+      "byteSize": 52428800,
+      "flags": {
+        "selectable": true,
+        "default": true
+      }
+    },
+    {
+      "path": "test-files/100-mibibytes",
+      "byteSize": 104857600,
+      "flags": {
+        "selectable": true
+      }
+    },
+    {
+      "path": "test-files/250-mibibytes",
+      "byteSize": 262144000,
+      "flags": {
+        "selectable": true
+      }
+    }
+  ]
+}

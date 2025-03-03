@@ -15,7 +15,7 @@ export interface IHttpRequest {
 export interface IHttpResponse {
     status: number,
     statusText: string,
-    response?: any
+    payload?: any
 }
 
 export interface IHttpRequestHandling<RESOLVE, REJECT> {
@@ -51,14 +51,14 @@ export const IHttpRequestHandling_DEFAULTS: IHttpRequestHandling<IHttpResponse, 
                     resolve({
                         status: xhr.status,
                         statusText: xhr.statusText,
-                        response: xhr.response
-                    })
+                        payload: xhr.response
+                    } as IHttpResponse)
                 } else {
                     reject({
                         status: xhr.status,
                         statusText: xhr.statusText,
-                        response: xhr.response
-                    })
+                        payload: xhr.response
+                    } as IHttpResponse)
                 }
             }
         })
