@@ -37,10 +37,10 @@ export class DataUnits {
     static readonly PETA_BIT: DataUnit = new DataUnit("Pb", "Petabit", DataUnitType.SI, DataUnitBase.BIT, 5)
 
     static readonly KIBI_BIT: DataUnit = new DataUnit("Kib", "Kibibit", DataUnitType.BINARY, DataUnitBase.BIT, 1)
-    static readonly MEBI_BIT: DataUnit = new DataUnit("Mib", "Mebibit", DataUnitType.BINARY, DataUnitBase.BIT, 1)
-    static readonly GIBI_BIT: DataUnit = new DataUnit("Gib", "Gibibit", DataUnitType.BINARY, DataUnitBase.BIT, 1)
-    static readonly TEBI_BIT: DataUnit = new DataUnit("Tib", "Tebibit", DataUnitType.BINARY, DataUnitBase.BIT, 1)
-    static readonly PEBI_BIT: DataUnit = new DataUnit("Pib", "Pebibit", DataUnitType.BINARY, DataUnitBase.BIT, 1)
+    static readonly MEBI_BIT: DataUnit = new DataUnit("Mib", "Mebibit", DataUnitType.BINARY, DataUnitBase.BIT, 2)
+    static readonly GIBI_BIT: DataUnit = new DataUnit("Gib", "Gibibit", DataUnitType.BINARY, DataUnitBase.BIT, 3)
+    static readonly TEBI_BIT: DataUnit = new DataUnit("Tib", "Tebibit", DataUnitType.BINARY, DataUnitBase.BIT, 4)
+    static readonly PEBI_BIT: DataUnit = new DataUnit("Pib", "Pebibit", DataUnitType.BINARY, DataUnitBase.BIT, 5)
 
     static readonly BYTE: DataUnit = new DataUnit("B", "Byte", DataUnitType.BASE, DataUnitBase.BYTE, 1)
 
