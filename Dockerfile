@@ -8,6 +8,8 @@ WORKDIR /application
 
 COPY docker-entrypoint.sh .
 RUN chmod +x docker-entrypoint.sh
+COPY test-file-setup.sh .
+RUN chmod +x test-file-setup.sh
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/site.conf  /etc/nginx/conf.d/size.conf
