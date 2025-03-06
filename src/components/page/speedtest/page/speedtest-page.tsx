@@ -1,162 +1,179 @@
 import "./speedtest-page.scss"
-import {Box, Button, Grid2} from "@mui/material"
+import {Box, Button, Stack} from "@mui/material"
 import useTestFileConfigurationStore from "../../../../state/configuration/test-file-configuration-state.ts"
 import useDataUnitStore from "../../../../state/configuration/data-unit-state.ts";
 import useLatencyTestStore from "../../../../state/configuration/latency-test-state.ts";
 import useDownloadSpeedTestStore from "../../../../state/configuration/download-speed-test-state.ts";
 import useUploadSpeedTestStore from "../../../../state/configuration/upload-speed-test-state.ts";
+import GaugeDisplay from "../../../display/gauge/gauge-display.tsx";
+import PlotDisplay from "../../../display/plot/plot-display.tsx";
+import ScatterDisplay from "../../../display/scatter/scatter-display.tsx";
+import {useState} from "react";
+import LatencyTest from "../../../../api/speedtest/tests/latency/latency-test.ts";
+import {ILatencyMeasurementEvent} from "../../../../api/speedtest/calculations/latency-calculation.ts";
+import DownloadSpeedTest from "../../../../api/speedtest/tests/speed/download-speed-test.ts";
+import {ISpeedChangeDeltaEvent} from "../../../../api/speedtest/calculations/speed-calculation.ts";
+import UploadSpeedTest from "../../../../api/speedtest/tests/speed/upload-speed-test.ts";
+import {generateRandomData} from "../../../../api/misc/data-generator.ts";
+import {DataUnits} from "../../../../api/misc/units/types/data-units.ts";
+import Value from "../../../../api/misc/units/value.ts";
 
 export default function SpeedtestPage() {
 
-    const {base: unitBase, type: unitType, unit, _actions: unitActions, _ctrl: unitControls} = useDataUnitStore()
+    const {unit, _actions: unitActions} = useDataUnitStore()
 
-    const {testFileConfiguration, _ctrl: assetCtrl} = useTestFileConfigurationStore()
+    const {_ctrl: assetCtrl} = useTestFileConfigurationStore()
     if (!assetCtrl.readyToBeUsed)
         throw assetCtrl.bootstrap()
 
-    const {enabled: latencyEnabled, parameters: latencyParameters, _actions: latencyActions, _ctrl: latencyControls} = useLatencyTestStore()
-    if (!latencyControls.readyToBeUsed)
-        throw latencyControls.bootstrap()
+    const {enabled: latencyTestEnabled, method: latencyTestMethod, parameters: latencyTestParameters, _actions: latencyStateActions, _ctrl: latencyStoreControls} = useLatencyTestStore()
+    if (!latencyStoreControls.readyToBeUsed)
+        throw latencyStoreControls.bootstrap()
 
-    const {enabled: downloadEnabled, payloadSize: downloadSize, parameters: downloadParameters, _actions: downloadActions, _ctrl: downloadControls} = useDownloadSpeedTestStore()
-    if (!downloadControls.readyToBeUsed)
-        throw downloadControls.bootstrap()
+    const {enabled: downloadTestEnabled, parameters: downloadTestParameters, _actions: downloadStateActions, _ctrl: downloadStoreControls} = useDownloadSpeedTestStore()
+    if (!downloadStoreControls.readyToBeUsed)
+        throw downloadStoreControls.bootstrap()
 
-    const {enabled: uploadEnabled, payloadSize: uploadSize, parameters: uploadParameters, _actions: uploadActions, _ctrl: uploadControls} = useUploadSpeedTestStore()
-    if (!uploadControls.readyToBeUsed)
-        throw uploadControls.bootstrap()
+    const {enabled: uploadTestEnabled, payloadSize: uploadPayloadSize, parameters: uploadTestParameters, _actions: uploadStateActions, _ctrl: uploadStoreControls} = useUploadSpeedTestStore()
+    if (!uploadStoreControls.readyToBeUsed)
+        throw uploadStoreControls.bootstrap()
 
+    const latencyTest = new LatencyTest({
+        method: latencyTestMethod,
+        url: latencyStateActions.resolveTestFileDefinition()!.path,
+        parameters: {
+            minDelay: latencyTestParameters.minDelay,
+            maxDuration: latencyTestParameters.maxDuration,
+            maxRequests: latencyTestParameters.maxRequests
+        }
+    })
 
-    //
-    // const [testIsRunning, setTestRunning] = useState<boolean>(false)
-    // const [gaugeValue, setGaugeValue] = useState<number | undefined>()
-    // const [gaugeOverlayText, setGaugeOverlayText] = useState<string | undefined>()
-    // const [latencyMsMeasurements, setLatencyMsMeasurements] = useState<number[]>([])
-    //
-    // function addLatencyMsMeasurement(value: number) {
-    //     setLatencyMsMeasurements(prevState => [...prevState, value])
-    // }
-    //
-    // const [latencyOverlayText, setLatencyOverlayText] = useState<string | undefined>()
-    // const [downloadBpsMeasurements, setDownloadBpsMeasurements] = useState<number[]>([])
-    //
-    // function addDownloadBpsMeasurement(value: number) {
-    //     setDownloadBpsMeasurements(prevState => [...prevState, value])
-    // }
-    //
-    // const [downloadOverlayText, setDownloadOverlayText] = useState<string | undefined>()
-    // const [uploadBpsMeasurements, setUploadBpsMeasurements] = useState<number[]>([])
-    //
-    // function addUploadBpsMeasurement(value: number) {
-    //     setUploadBpsMeasurements(prevState => [...prevState, value])
-    // }
-    //
-    // const [uploadOverlayText, setUploadOverlayText] = useState<string | undefined>()
-    //
-    // function handleLatencyMeasurement(data: ILatencyMeasurement) {
-    //     addLatencyMsMeasurement(data.latency)
-    // }
-    //
-    // function handleLatencyResult(data: ILatencyCalculationResult) {
-    //     setLatencyOverlayText(`${data.latency}ms\n±${data.jitter}`)
-    // }
-    //
-    // function handleDownloadMeasurement(data: ISpeedChangeDelta) {
-    //     addDownloadBpsMeasurement(data.deltaBytesPerSecond)
-    //     const displayValue = convertDataValue({value: data.deltaBytesPerSecond, unit: DataUnit.BYTE},
-    //         DataUnit.ofId(userTestConfiguration?.display.useFixedUnit), 2, userTestConfiguration?.display.useSIUnits, userTestConfiguration?.display.useByteUnits)
-    //     setGaugeValue(displayValue.value)
-    //     setGaugeOverlayText(`${displayValue.value} ${displayValue.unit.unit}/s`)
-    // }
-    //
-    // function handleDownloadResult(data: ISpeedCalculationResult) {
-    //     const displayValue = convertDataValue({value: data.averageBytesPerSecond, unit: DataUnit.BYTE},
-    //         DataUnit.ofId(userTestConfiguration?.display.useFixedUnit), 2, userTestConfiguration?.display.useSIUnits, userTestConfiguration?.display.useByteUnits)
-    //     setDownloadOverlayText(`${displayValue.value} ${displayValue.unit.unit}/s`)
-    //     setGaugeValue(undefined)
-    //     setGaugeOverlayText(undefined)
-    // }
-    //
-    // function handleUploadMeasurement(data: ISpeedChangeDelta) {
-    //     addUploadBpsMeasurement(data.deltaBytesPerSecond)
-    //     const displayValue = convertDataValue({value: data.deltaBytesPerSecond, unit: DataUnit.BYTE},
-    //         DataUnit.ofId(userTestConfiguration?.display.useFixedUnit), 2, userTestConfiguration?.display.useSIUnits, userTestConfiguration?.display.useByteUnits)
-    //     setGaugeValue(displayValue.value)
-    //     setGaugeOverlayText(`${displayValue.value} ${displayValue.unit.unit}/s`)
-    // }
-    //
-    // function handleUploadResult(data: ISpeedCalculationResult) {
-    //     const displayValue = convertDataValue({value: data.averageBytesPerSecond, unit: DataUnit.BYTE},
-    //         DataUnit.ofId(userTestConfiguration?.display.useFixedUnit), 2, userTestConfiguration?.display.useSIUnits, userTestConfiguration?.display.useByteUnits)
-    //     setUploadOverlayText(`${displayValue.value} ${displayValue.unit.unit}/s`)
-    //     setGaugeValue(undefined)
-    //     setGaugeOverlayText(undefined)
-    // }
-    //
-    // function resetTestResults() {
-    //     setGaugeValue(undefined)
-    //     setGaugeOverlayText(undefined)
-    //     setLatencyMsMeasurements([])
-    //     setLatencyOverlayText(undefined)
-    //     setDownloadBpsMeasurements([])
-    //     setDownloadOverlayText(undefined)
-    //     setUploadBpsMeasurements([])
-    //     setUploadOverlayText(undefined)
-    // }
-    //
-    // async function runSpeedTest() {
-    //     setTestRunning(true)
-    //     resetTestResults()
-    //     await speedtest!.runTestSuit()
-    //     setTestRunning(false)
-    // }
+    const downloadTest = new DownloadSpeedTest({
+        url: downloadStateActions.resolveTestFileDefinition()!.path,
+        parameters: {
+            minDelay: downloadTestParameters.minDelay,
+            maxDuration: downloadTestParameters.maxDuration,
+            maxRequests: downloadTestParameters.maxRequests
+        }
+    })
+
+    const uploadTest = new UploadSpeedTest({
+        url: uploadStateActions.resolveTestFileDefinition()!.path,
+        payload: generateRandomData(Value.convert(uploadPayloadSize!, DataUnits.BYTE).value),
+        parameters: {
+            minDelay: uploadTestParameters.minDelay,
+            maxDuration: uploadTestParameters.maxDuration,
+            maxRequests: uploadTestParameters.maxRequests
+        }
+    })
+
+    const [testIsRunning, setTestRunning] = useState<boolean>(false)
+
+    const [gaugeValue, setGaugeValue] = useState<number | undefined>()
+    const [gaugeOverlayText, setGaugeOverlayText] = useState<string | undefined>()
+
+    const [latencyMeasurements, setLatencyMeasurements] = useState<ILatencyMeasurementEvent[]>([])
+    const [latencyOverlayText, setLatencyOverlayText] = useState<string | undefined>()
+
+    const [downloadMeasurements, setDownloadMeasurements] = useState<ISpeedChangeDeltaEvent[]>([])
+    const [downloadOverlayText, setDownloadOverlayText] = useState<string | undefined>()
+
+    const [uploadMeasurements, setUploadMeasurements] = useState<ISpeedChangeDeltaEvent[]>([])
+    const [uploadOverlayText, setUploadOverlayText] = useState<string | undefined>()
+
+    async function runTestSuite() {
+        setTestRunning(true)
+        setGaugeValue(undefined)
+        setGaugeOverlayText(undefined)
+        setLatencyMeasurements([])
+        setLatencyOverlayText(undefined)
+        setDownloadMeasurements([])
+        setDownloadOverlayText(undefined)
+        setUploadMeasurements([])
+        setUploadOverlayText(undefined)
+
+        try {
+            await latencyTest.run({
+                controls: {
+                    skip: !latencyTestEnabled
+                },
+                testRunInput: {
+                    measurement: value => setLatencyMeasurements(previous => [...previous, value]),
+                    result: value => setLatencyOverlayText(`${value.latency} ms ± ${value.jitter} ms`)
+                }
+            })
+            await downloadTest.run({
+                controls: {
+                    skip: !downloadTestEnabled
+                },
+                testRunInput: {
+                    changeDelta: value => {
+                        setDownloadMeasurements(previous => [...previous, value])
+                        setGaugeValue(unitActions.convert(value.dataPerSecond).value)
+                        setGaugeOverlayText(`${unitActions.convert(value.dataPerSecond).value} ${unit!.toString()}`)
+                    },
+                    result: value => setDownloadOverlayText(unitActions.convert(value.averageDataPerSecond).toString())
+                }
+            })
+            await uploadTest.run({
+                controls: {
+                    skip: !uploadTestEnabled
+                },
+                testRunInput: {
+                    changeDelta: value => {
+                        setUploadMeasurements(previous => [...previous, value])
+                        setGaugeValue(unitActions.convert(value.dataPerSecond).value)
+                        setGaugeOverlayText(unitActions.convert(value.dataPerSecond).toString())
+                    },
+                    result: value => setUploadOverlayText(unitActions.convert(value.averageDataPerSecond).toString())
+                }
+            })
+        }catch (e) {
+            console.error(e)
+        }
+        setGaugeValue(undefined)
+        setGaugeOverlayText(undefined)
+        setTestRunning(false)
+    }
 
     return (
         <Box className="speedtest-page">
-            {/*<Grid2 container spacing={2} columns={1}>*/}
-            {/*    <Grid2 size={1} >*/}
-            {/*        <GaugeDisplay*/}
-            {/*            className={"speed-display"}*/}
-            {/*            currentValue={gaugeValue}*/}
-            {/*            maxValue={1000}*/}
-            {/*            overlayText={gaugeOverlayText}*/}
-            {/*        />*/}
-            {/*    </Grid2>*/}
-            {/*    <Grid2 container columns={3} size={1}>*/}
-            {/*        <Grid2 size={1}>*/}
-            {/*            <PlotDisplay*/}
-            {/*                className={"download-display"}*/}
-            {/*                title={"Download"}*/}
-            {/*                overlayText={downloadOverlayText}*/}
-            {/*                data={downloadBpsMeasurements}*/}
-            {/*            />*/}
-            {/*        </Grid2>*/}
-            {/*        <Grid2 size={1}>*/}
-            {/*            <ScatterDisplay*/}
-            {/*                className={"latency-display"}*/}
-            {/*                title={"Latency"}*/}
-            {/*                overlayText={latencyOverlayText}*/}
-            {/*                data={{latency: latencyMsMeasurements}}*/}
-            {/*            />*/}
-            {/*        </Grid2>*/}
-            {/*        <Grid2 size={1}>*/}
-            {/*            <PlotDisplay*/}
-            {/*                className={"upload-display"}*/}
-            {/*                title={"Upload"}*/}
-            {/*                overlayText={uploadOverlayText}*/}
-            {/*                data={uploadBpsMeasurements}*/}
-            {/*            />*/}
-            {/*        </Grid2>*/}
-            {/*    </Grid2>*/}
-            {/*    <Grid2 size={1} className={"test-trigger"}>*/}
-            {/*        {*/}
-            {/*            !testIsRunning ?*/}
-            {/*                <Button variant="contained" onClick={runSpeedTest}>*/}
-            {/*                    START*/}
-            {/*                </Button> : <></>*/}
-            {/*        }*/}
-            {/*    </Grid2>*/}
-            {/*</Grid2>*/}
+            <Stack spacing={2}>
+                <GaugeDisplay
+                    className={"speed-display"}
+                    currentValue={gaugeValue}
+                    maxValue={1000}
+                    overlayText={gaugeOverlayText}
+                />
+                <Stack direction={"row"} spacing={1}>
+                    <PlotDisplay
+                        className={"download-display"}
+                        title={"Download"}
+                        overlayText={downloadOverlayText}
+                        data={[...downloadMeasurements.map(value => value.dataPerSecond.value)]}
+                    />
+                    <ScatterDisplay
+                        className={"latency-display"}
+                        title={"Latency"}
+                        overlayText={latencyOverlayText}
+                        data={{latency: [...latencyMeasurements.map(value => value.latency)]}}
+                    />
+                    <PlotDisplay
+                        className={"upload-display"}
+                        title={"Upload"}
+                        overlayText={uploadOverlayText}
+                        data={[...uploadMeasurements.map(value => value.dataPerSecond.value)]}
+                    />
+                </Stack>
+                {
+                    !testIsRunning ?
+                        <Button className={"test-trigger"} variant="contained" onClick={runTestSuite}>
+                            START
+                        </Button>
+                        : <></>
+                }
+            </Stack>
+
         </Box>
     )
 }

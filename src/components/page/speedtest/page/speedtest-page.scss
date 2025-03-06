@@ -23,11 +23,10 @@
   .test-trigger{
     text-align: center;
 
-    button {
-      padding: 1rem;
-      width: 100%;
-      background-color: $fast_test-primary;
-    }
+    padding: 1rem;
+    width: 100%;
+    background-color: $fast_test-primary;
+    border-radius: 1rem;
   }
 
 }

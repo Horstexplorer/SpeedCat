@@ -62,7 +62,7 @@ const useLatencyTestStore = create<ILatencyTestStore>()(
                 },
                 resolveTestFileDefinition: () => {
                     const currentState = get()
-                    if (currentState._ctrl.readyToBeUsed)
+                    if (!currentState._ctrl.readyToBeUsed)
                         return undefined
                     const testFileStoreState = useTestFileConfigurationStore.getState()
                     if (!testFileStoreState._ctrl.readyToBeUsed)
