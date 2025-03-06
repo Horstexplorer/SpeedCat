@@ -33,24 +33,27 @@ export default function SpeedtestConfigurator() {
     if (!uploadControls.readyToBeUsed)
         throw uploadControls.bootstrap()
 
-    function convertDataValueToDisplayValue(value: Value<DataUnit>): Value<DataUnit> {
-        return Value.convert(value, unit || DataUnits.values().find(unit => unit.type == unitType && unit.base == unitBase)!)
-    }
-
     function convertToBytes(value: number): Value<DataUnit> {
         return new Value(value, DataUnits.BYTE)
     }
 
-    const selectableTestFileSizes: { value: number, label: string }[] = testFileConfiguration?.dataDefinitions
-        .filter(definition => definition.flags?.selectable)
-        .map(definition => {
-            const bytes = convertToBytes(definition.byteSize!)
-            const displayValue = convertDataValueToDisplayValue(bytes)
-            return {
-                value: bytes.value,
-                label: displayValue.toString()
-            }
-        }) || [];
+    const selectableTestFileSizeDisplayValues: { value: number, label: string }[] = testFileConfiguration?.dataDefinitions
+            .filter(definition => definition.flags?.selectable)
+            .map(definition => {
+                const bytes = convertToBytes(definition.byteSize!)
+                const displayValue = unitActions.convert(bytes)
+                return {
+                    value: bytes.value,
+                    label: displayValue.toString()
+                }
+            })
+        || []
+
+    const selectableDataUnitDisplayValues: { key: string, value: string }[] = DataUnits.values()
+        .filter(dataUnit => dataUnit.base == unitBase && dataUnit.type == unitType)
+        .map(unit => {
+            return {key: `${unit.unitText} (${unit.unit})`, value: unit?.uid}
+        })
 
     return (
         <Box className="speedtest-configurator">
@@ -90,10 +93,7 @@ export default function SpeedtestConfigurator() {
                             </Typography>
                             <InputSelect id={"format-using-data-unit"}
                                          value={unit?.uid}
-                                         availableValues={DataUnits.values()
-                                             .filter(dataUnit => dataUnit.base == unitBase && dataUnit.type == unitType)
-                                             .map(unit => {
-                                                 return {key: `${unit.unitText} (${unit.unit})`, value: unit?.uid}})}
+                                         availableValues={selectableDataUnitDisplayValues}
                                          onValueChange={value => unitActions.setUnit(DataUnits.values().find(dataUnit => dataUnit.uid == value))}
                             />
                         </Grid2>
@@ -155,10 +155,10 @@ export default function SpeedtestConfigurator() {
                     </Stack>
                     <Stack direction={"column"} spacing={1}>
                         <NormalInputSlider id={"download-payload-size"}
-                                           min={selectableTestFileSizes[0]?.value}
-                                           max={selectableTestFileSizes[selectableTestFileSizes.length - 1]?.value}
+                                           min={Math.min(...selectableTestFileSizeDisplayValues.map(entry => entry.value))}
+                                           max={Math.max(...selectableTestFileSizeDisplayValues.map(entry => entry.value))}
                                            step={null}
-                                           marks={selectableTestFileSizes}
+                                           marks={selectableTestFileSizeDisplayValues}
                                            disabled={!downloadEnabled}
                                            value={downloadSize!.value}
                                            onValueChange={value => downloadActions.setPayloadSize(convertToBytes(value))}
@@ -203,10 +203,10 @@ export default function SpeedtestConfigurator() {
                     </Stack>
                     <Stack direction={"column"} spacing={1}>
                         <NormalInputSlider id={"upload-payload-size"}
-                                           min={selectableTestFileSizes[0]?.value}
-                                           max={selectableTestFileSizes[selectableTestFileSizes.length - 1]?.value}
+                                           min={Math.min(...selectableTestFileSizeDisplayValues.map(entry => entry.value))}
+                                           max={Math.max(...selectableTestFileSizeDisplayValues.map(entry => entry.value))}
                                            step={null}
-                                           marks={selectableTestFileSizes}
+                                           marks={selectableTestFileSizeDisplayValues}
                                            disabled={!uploadEnabled}
                                            value={uploadSize!.value}
                                            onValueChange={value => uploadActions.setPayloadSize(convertToBytes(value))}
