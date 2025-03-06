@@ -1,8 +1,8 @@
 name: Build and Publish as Docker Image
+
 on:
-  push:
-    paths-ignore:
-      - "*.md"
+  workflow_dispatch:
+
 permissions:
   contents: read
   packages: write
