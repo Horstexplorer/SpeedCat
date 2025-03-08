@@ -91,7 +91,7 @@ const useUploadSpeedTestStore = create<IUploadSpeedTestStore>()(
                     } else {
                         const byteSize = Value.convert(currentState.payloadSize, DataUnits.BYTE).value
                         const asset = assetConfig.dataDefinitions
-                            .find(definition => definition.flags?.selectable && definition.flags.default && definition.byteSize == byteSize)
+                            .find(definition => definition.flags?.selectable && definition.byteSize == byteSize)
                         if (!asset) {
                             currentState._ctrl.resetState()
                             return currentState._ctrl.bootstrap()
