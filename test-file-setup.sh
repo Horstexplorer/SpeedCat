@@ -6,9 +6,9 @@ FAST_TEST__TEST_FILE_ROOT=${FAST_TEST__TEST_FILE_ROOT:"public"}
 
 echo "Automatic test file asset creation"
 
-  cd $FAST_TEST__TEST_FILE_ROOT || exit
+  cd "$FAST_TEST__TEST_FILE_ROOT" || exit
 
-  if [ $FAST_TEST__RECREATE_PAYLOADS = true ]; then
+  if [ "$FAST_TEST__RECREATE_PAYLOADS" = true ]; then
     rm -rf test-files
   fi
 
