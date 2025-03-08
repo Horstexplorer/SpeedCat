@@ -49,7 +49,11 @@ export default function performSpeedRequest(request: ISpeedRequest, ...eventCall
         payload: request.payload,
         settings: {
             timeout: request.timeout,
-            responseType: "blob"
+            responseType: "blob",
+            headers: request.payload ?
+                new Map<string, string>([
+                    ["Content-Type", "application/octet-stream"]
+                ]) : undefined
         }
     }
 

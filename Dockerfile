@@ -12,7 +12,7 @@ COPY test-file-setup.sh .
 RUN chmod +x test-file-setup.sh
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
-COPY nginx/site.conf  /etc/nginx/conf.d/size.conf
+COPY nginx/site.conf  /etc/nginx/conf.d/site.conf
 COPY dist /application/www
 
 EXPOSE 8080
