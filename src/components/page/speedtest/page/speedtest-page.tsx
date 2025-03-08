@@ -20,7 +20,7 @@ import Value from "../../../../api/misc/units/value.ts";
 
 export default function SpeedtestPage() {
 
-    const {unit, _actions: unitActions} = useDataUnitStore()
+    const {_actions: unitActions} = useDataUnitStore()
 
     const {_ctrl: assetCtrl} = useTestFileConfigurationStore()
     if (!assetCtrl.readyToBeUsed)
@@ -110,7 +110,7 @@ export default function SpeedtestPage() {
                     changeDelta: value => {
                         setDownloadMeasurements(previous => [...previous, value])
                         setGaugeValue(unitActions.convert(value.dataPerSecond).value)
-                        setGaugeOverlayText(`${unitActions.convert(value.dataPerSecond).value} ${unit!.toString()}`)
+                        setGaugeOverlayText(unitActions.convert(value.dataPerSecond).toString())
                     },
                     result: value => setDownloadOverlayText(unitActions.convert(value.averageDataPerSecond).toString())
                 }
