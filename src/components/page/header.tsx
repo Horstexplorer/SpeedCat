@@ -15,10 +15,10 @@ export default function Header() {
             <AppBar className="header-app-bar">
                 <Toolbar>
                     <Typography variant="h6" component="div">
-                        Fast-Test
+                        SpeedCat
                     </Typography>
                     <Box className={"full-width-spacer"} />
-                    <IconButton className={"header-icon-button"} onClick={() => window.location.href = "https://github.com/Horstexplorer/FastTest"}>
+                    <IconButton className={"header-icon-button"} onClick={() => window.location.href = "https://github.com/Horstexplorer/SpeedCat"}>
                         <GitHubIcon />
                     </IconButton>
                     <IconButton className={"header-icon-button"} onClick={() => {
