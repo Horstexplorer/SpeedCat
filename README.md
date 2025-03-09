@@ -4,6 +4,8 @@ Built using TypeScript, React, and native web APIs, it is designed to be univers
 SpeedCat operates fully client-side, requiring only a web server of your choice to self-host.
 All tests are conducted exclusively between the client and the self-hosted server, providing privacy and peace of mind.
 
+A demo is available at [demo.speedc.at](https://demo.speedc.at). Please don't break it, it's a tiny environment.
+
 ## Setup
 ### Prebuilt Docker image
 Prebuild docker images are available which can be utilized via docker compose.
