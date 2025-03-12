@@ -12,7 +12,10 @@ import {useState} from "react";
 import LatencyTest from "../../../../api/speedtest/tests/latency/latency-test.ts";
 import {ILatencyMeasurementEvent} from "../../../../api/speedtest/calculations/latency-calculation.ts";
 import DownloadSpeedTest from "../../../../api/speedtest/tests/speed/download-speed-test.ts";
-import {ISpeedChangeDeltaEvent} from "../../../../api/speedtest/calculations/speed-calculation.ts";
+import {
+    calculateSpeedCalculationResult, ISpeedCalculationResult,
+    ISpeedChangeDeltaEvent
+} from "../../../../api/speedtest/calculations/speed-calculation.ts";
 import UploadSpeedTest from "../../../../api/speedtest/tests/speed/upload-speed-test.ts";
 import {generateRandomData} from "../../../../api/misc/data-generator.ts";
 import {DataUnits} from "../../../../api/misc/units/types/data-units.ts";
@@ -75,10 +78,12 @@ export default function SpeedtestPage() {
     const [latencyMeasurements, setLatencyMeasurements] = useState<ILatencyMeasurementEvent[]>([])
     const [latencyOverlayText, setLatencyOverlayText] = useState<string | undefined>()
 
-    const [downloadMeasurements, setDownloadMeasurements] = useState<ISpeedChangeDeltaEvent[]>([])
+    let downloadChangeDeltaBuffer: ISpeedChangeDeltaEvent[] = []
+    const [downloadResults, setDownloadResults] = useState<ISpeedCalculationResult[]>([])
     const [downloadOverlayText, setDownloadOverlayText] = useState<string | undefined>()
 
-    const [uploadMeasurements, setUploadMeasurements] = useState<ISpeedChangeDeltaEvent[]>([])
+    let uploadChangeDeltaBuffer: ISpeedChangeDeltaEvent[] = []
+    const [uploadResults, setUploadResults] = useState<ISpeedCalculationResult[]>([])
     const [uploadOverlayText, setUploadOverlayText] = useState<string | undefined>()
 
     async function runTestSuite() {
@@ -87,10 +92,29 @@ export default function SpeedtestPage() {
         setGaugeOverlayText(undefined)
         setLatencyMeasurements([])
         setLatencyOverlayText(undefined)
-        setDownloadMeasurements([])
+        downloadChangeDeltaBuffer = []
+        setDownloadResults([])
         setDownloadOverlayText(undefined)
-        setUploadMeasurements([])
+        uploadChangeDeltaBuffer = []
+        setUploadResults([])
         setUploadOverlayText(undefined)
+
+        function doPerformUpdate() {
+            if (downloadChangeDeltaBuffer.length > 0) {
+                const downloadResult= calculateSpeedCalculationResult(downloadChangeDeltaBuffer)
+                setDownloadResults(previous => [...previous, downloadResult])
+                setGaugeValue(unitActions.convert(downloadResult.averageDataPerSecond).value)
+                setGaugeOverlayText(unitActions.convert(downloadResult.averageDataPerSecond).toString())
+                downloadChangeDeltaBuffer = []
+            } else if (uploadChangeDeltaBuffer.length > 0) {
+                const uploadResult = calculateSpeedCalculationResult(uploadChangeDeltaBuffer)
+                setUploadResults(previous => [...previous, uploadResult])
+                setGaugeValue(unitActions.convert(uploadResult.averageDataPerSecond).value)
+                setGaugeOverlayText(unitActions.convert(uploadResult.averageDataPerSecond).toString())
+                uploadChangeDeltaBuffer = []
+            }
+        }
+        const updateLoop = setInterval(() => doPerformUpdate(), 150)
 
         try {
             await latencyTest.run({
@@ -102,35 +126,33 @@ export default function SpeedtestPage() {
                     result: value => setLatencyOverlayText(`${value.latency} ms ± ${value.jitter} ms`)
                 }
             })
+            await new Promise(resolve => setTimeout(resolve, 1000))
             await downloadTest.run({
                 controls: {
                     skip: !downloadTestEnabled
                 },
                 testRunInput: {
-                    changeDelta: value => {
-                        setDownloadMeasurements(previous => [...previous, value])
-                        setGaugeValue(unitActions.convert(value.dataPerSecond).value)
-                        setGaugeOverlayText(unitActions.convert(value.dataPerSecond).toString())
-                    },
+                    changeDelta: value => downloadChangeDeltaBuffer.push(value),
                     result: value => setDownloadOverlayText(unitActions.convert(value.averageDataPerSecond).toString())
                 }
             })
+            await new Promise(resolve => setTimeout(resolve, 1000))
             await uploadTest.run({
                 controls: {
                     skip: !uploadTestEnabled
                 },
                 testRunInput: {
-                    changeDelta: value => {
-                        setUploadMeasurements(previous => [...previous, value])
-                        setGaugeValue(unitActions.convert(value.dataPerSecond).value)
-                        setGaugeOverlayText(unitActions.convert(value.dataPerSecond).toString())
-                    },
+                    changeDelta: value => uploadChangeDeltaBuffer.push(value),
                     result: value => setUploadOverlayText(unitActions.convert(value.averageDataPerSecond).toString())
                 }
             })
         }catch (e) {
             console.error(e)
         }
+
+        clearInterval(updateLoop)
+        doPerformUpdate()
+
         setGaugeValue(undefined)
         setGaugeOverlayText(undefined)
         setTestRunning(false)
@@ -150,7 +172,7 @@ export default function SpeedtestPage() {
                         className={"download-display"}
                         title={"Download"}
                         overlayText={downloadOverlayText}
-                        data={[...downloadMeasurements.map(value => value.dataPerSecond.value)]}
+                        data={[...downloadResults.map(value => value.averageDataPerSecond.value)]}
                     />
                     <ScatterDisplay
                         className={"latency-display"}
@@ -162,7 +184,7 @@ export default function SpeedtestPage() {
                         className={"upload-display"}
                         title={"Upload"}
                         overlayText={uploadOverlayText}
-                        data={[...uploadMeasurements.map(value => value.dataPerSecond.value)]}
+                        data={[...uploadResults.map(value => value.averageDataPerSecond.value)]}
                     />
                 </Stack>
                 {

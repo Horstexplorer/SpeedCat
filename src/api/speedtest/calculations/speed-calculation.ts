@@ -90,7 +90,7 @@ function calculateChangeDelta(previous: ISpeedStateChangeEvent | undefined, next
     }
 }
 
-function calculateSpeedCalculationResult(changeDeltas: ISpeedChangeDelta[]): ISpeedCalculationResult {
+export function calculateSpeedCalculationResult(changeDeltas: ISpeedChangeDelta[]): ISpeedCalculationResult {
     const totalTime = changeDeltas
         .map(changeDelta => changeDelta.deltaTime)
         .reduce((previous, current) => previous + current, 0)
