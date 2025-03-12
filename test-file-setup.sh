@@ -1,10 +1,11 @@
 #!/bin/bash
 
-
 FAST_TEST__RECREATE_PAYLOADS=${FAST_TEST__RECREATE_PAYLOADS:false}
-FAST_TEST__TEST_FILE_ROOT=${FAST_TEST__TEST_FILE_ROOT:"public"}
+FAST_TEST__TEST_FILE_ROOT="public"
 
 echo "Automatic test file asset creation"
+
+echo $FAST_TEST__TEST_FILE_ROOT
 
   cd "$FAST_TEST__TEST_FILE_ROOT" || exit
 
