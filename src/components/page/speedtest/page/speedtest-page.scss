@@ -2,22 +2,45 @@
 
 .speedtest-page {
   height: 100%;
-  margin: 2rem;
+  margin: 1rem;
 
-  .speed-display {
-    --gauge-color: #{$fast_test-secondary};
+  .gauge-display {
+    .apexcharts-radial-series[seriesName="Download"] path {
+      stroke: $fast_test-primary;
+    }
+    .apexcharts-radial-series[seriesName="Upload"] path {
+      stroke: $fast_test-tertiary;
+    }
   }
 
-  .download-display {
-    --graph-color: #{$fast_test-primary};
+  .latency-display{
+    .scatter-title {
+      color: $fast_test-secondary;
+    }
+    .apexcharts-series[seriesName="Latency"] path {
+      fill: $fast_test-secondary;
+      opacity: .5;
+    }
   }
 
-  .latency-display {
-    --scatter-color-latency: #{$fast_test-secondary};
+  .download-display{
+    .plot-title {
+      color: $fast_test-primary;
+    }
+    .apexcharts-series[seriesName="Download"] path {
+      stroke: $fast_test-primary;
+      opacity: .5;
+    }
   }
 
-  .upload-display {
-    --graph-color: #{$fast_test-tertiary};
+  .upload-display{
+    .plot-title {
+      color: $fast_test-tertiary;
+    }
+    .apexcharts-series[seriesName="Upload"] path {
+      stroke: $fast_test-tertiary;
+      opacity: .5;
+    }
   }
 
   .test-trigger{
@@ -26,7 +49,9 @@
     padding: 1rem;
     width: 100%;
     background-color: $fast_test-primary;
-    border-radius: 1rem;
+    border-radius: $default-radius;
+    font-size: xx-large;
+    font-weight: bold;
   }
 
 }

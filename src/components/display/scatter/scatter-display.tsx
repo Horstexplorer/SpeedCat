@@ -1,27 +1,69 @@
 import "./scatter-display.scss"
 import {Box, Grid2, Paper} from "@mui/material"
-import {CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, XAxis, YAxis} from "recharts"
+import Chart from "react-apexcharts";
+import {ApexOptions} from "apexcharts";
+
+export interface IScatterDisplayData {
+    name: string
+    data: number[] | number[][]
+}
+
+export interface IScatterDisplayVisualProperties {
+    animation?: {
+        enabled?: boolean,
+        speed?: number
+    }
+}
 
 export interface IScatterDisplayProperties {
     id?: string
     className?: string
     title?: string
+
     overlayText?: string
-    data: {[key: string]: number[]}
+    data: IScatterDisplayData[]
+
+    visualProperties?: IScatterDisplayVisualProperties
 }
 
 export default function ScatterDisplay(properties: IScatterDisplayProperties) {
-    function toToChartData(data: any[]): { x: any, y: any }[] {
-        return data.map((value, index) => {
-            return {x: index, y: value}
-        })
+
+    const noShow = {show: false}
+    const disabled = {enabled: false}
+    const noFilter = {filter: {type: 'none'}}
+
+    const options: ApexOptions = {
+        chart: {
+            type: "scatter",
+            toolbar: noShow,
+            zoom: disabled,
+            selection: disabled,
+            animations: {
+                enabled: properties.visualProperties?.animation?.enabled,
+                dynamicAnimation: {
+                    speed: properties.visualProperties?.animation?.speed
+                }
+            }
+        },
+        tooltip: disabled,
+        states: {
+            hover: noFilter,
+            active: noFilter
+        },
+        xaxis: {
+            tickPlacement: "off",
+            labels: noShow
+        },
+        yaxis: {
+            labels: noShow
+        }
     }
 
     return (
         <Box id={properties.id} className={properties.className ? `scatter-display ${properties.className}` : "scatter-display"}>
             <Box className={"scatter-overlay"}>
                 <Box className={"scatter-overlay-content"}>
-                    <h3>{properties.overlayText}</h3>
+                    {properties.overlayText}
                 </Box>
             </Box>
             <Paper className={"scatter-paper"} elevation={5}>
@@ -29,25 +71,16 @@ export default function ScatterDisplay(properties: IScatterDisplayProperties) {
                     {
                         properties.title ?
                             <Grid2 className={"scatter-title"} size={1}>
-                                <h4>{properties.title}</h4>
+                                {properties.title}
                             </Grid2> : <></>
                     }
                     <Grid2 className={"scatter-graph"} size={1}>
-                        <ResponsiveContainer>
-                            <ScatterChart>
-                                {
-                                    Object.entries(properties.data).find(([_, value]) => value.length > 0) ?
-                                        <CartesianGrid strokeDasharray="3 3" /> : <></>
-                                }
-                                <XAxis scale={"linear"} dataKey="x" type="number" hide={true}/>
-                                <YAxis dataKey="y" type="number" hide={true}/>
-                                {
-                                    Object.entries(properties.data).map(([key, value]) =>
-                                        <Scatter key={key} name={key} data={toToChartData(value)} fill={`var(--scatter-color-${key})`} fillOpacity={0.4}/>
-                                    )
-                                }
-                            </ScatterChart>
-                        </ResponsiveContainer>
+                        <Chart
+                            height={"100%"}
+                            options={options}
+                            series={properties.data}
+                            type={"scatter"}
+                        />
                     </Grid2>
                 </Grid2>
             </Paper>

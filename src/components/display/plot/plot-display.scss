@@ -1,6 +1,8 @@
+@use "../../../main" as *;
+
 .plot-display {
   position: relative;
-  height: 15vh;
+  height: 20vh;
   width: 100%;
 
   .plot-overlay {
@@ -13,17 +15,15 @@
       position: relative;
       text-align: center;
       top: 50%;
-      color: var(--graph-color);
-      h3 {
-        margin: 0;
-      }
+      font-size: xx-large;
+      font-weight: bold;
     }
 
   }
 
   .plot-paper {
     height: inherit;
-    border-radius: 1em;
+    border-radius: $default-radius;
     padding: 0.5rem;
 
     .plot-paper-grid {
@@ -32,14 +32,8 @@
 
     .plot-title {
       text-align: center;
-      color: var(--graph-color);
-      h4 {
-        margin: 0;
-      }
-    }
-
-    .plot-graph {
-
+      font-size: x-large;
+      font-weight: bold;
     }
 
   }

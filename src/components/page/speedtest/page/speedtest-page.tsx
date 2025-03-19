@@ -72,7 +72,7 @@ export default function SpeedtestPage() {
 
     const [testIsRunning, setTestRunning] = useState<boolean>(false)
 
-    const [gaugeValue, setGaugeValue] = useState<number | undefined>()
+    const [gaugeValue, setGaugeValue] = useState<number[]>([0,0])
     const [gaugeOverlayText, setGaugeOverlayText] = useState<string | undefined>()
 
     const [latencyMeasurements, setLatencyMeasurements] = useState<ILatencyMeasurementEvent[]>([])
@@ -88,7 +88,7 @@ export default function SpeedtestPage() {
 
     async function runTestSuite() {
         setTestRunning(true)
-        setGaugeValue(undefined)
+        setGaugeValue([0, 0])
         setGaugeOverlayText(undefined)
         setLatencyMeasurements([])
         setLatencyOverlayText(undefined)
@@ -102,19 +102,31 @@ export default function SpeedtestPage() {
         function doPerformUpdate() {
             if (downloadChangeDeltaBuffer.length > 0) {
                 const downloadResult= calculateSpeedCalculationResult(downloadChangeDeltaBuffer)
-                setDownloadResults(previous => [...previous, downloadResult])
-                setGaugeValue(unitActions.convert(downloadResult.averageDataPerSecond).value)
-                setGaugeOverlayText(unitActions.convert(downloadResult.averageDataPerSecond).toString())
+                setDownloadResults(previous => {
+                    if (previous.length > 0)
+                        return [...previous, downloadResult]
+                    return [{ samples: 0, averageDataPerSecond: new Value(0, DataUnits.BYTE) }, downloadResult]
+                })
+                const displayValue = unitActions.convert(downloadResult.averageDataPerSecond)
+                setGaugeOverlayText(displayValue.toString())
+                setGaugeValue([(displayValue.value / 10), 0])
+
                 downloadChangeDeltaBuffer = []
             } else if (uploadChangeDeltaBuffer.length > 0) {
                 const uploadResult = calculateSpeedCalculationResult(uploadChangeDeltaBuffer)
-                setUploadResults(previous => [...previous, uploadResult])
-                setGaugeValue(unitActions.convert(uploadResult.averageDataPerSecond).value)
-                setGaugeOverlayText(unitActions.convert(uploadResult.averageDataPerSecond).toString())
+                setUploadResults(previous => {
+                    if (previous.length > 0)
+                        return [...previous, uploadResult]
+                    return [{ samples: 0, averageDataPerSecond: new Value(0, DataUnits.BYTE) }, uploadResult]
+                })
+                const displayValue = unitActions.convert(uploadResult.averageDataPerSecond)
+                setGaugeOverlayText(displayValue.toString())
+                setGaugeValue(previous => [previous[0], (displayValue.value / 10)])
+
                 uploadChangeDeltaBuffer = []
             }
         }
-        const updateLoop = setInterval(() => doPerformUpdate(), 150)
+        const updateLoop = setInterval(() => doPerformUpdate(), 250)
 
         try {
             await latencyTest.run({
@@ -153,7 +165,6 @@ export default function SpeedtestPage() {
         clearInterval(updateLoop)
         doPerformUpdate()
 
-        setGaugeValue(undefined)
         setGaugeOverlayText(undefined)
         setTestRunning(false)
     }
@@ -163,28 +174,52 @@ export default function SpeedtestPage() {
             <Stack spacing={2}>
                 <GaugeDisplay
                     className={"speed-display"}
-                    currentValue={gaugeValue}
-                    maxValue={1000}
                     overlayText={gaugeOverlayText}
+                    data={[
+                        {
+                            name: "Download",
+                            percentage: gaugeValue[0]
+                        },
+                        {
+                            name: "Upload",
+                            percentage: gaugeValue[1]
+                        }
+                    ]}
                 />
                 <Stack direction={"row"} spacing={1}>
                     <PlotDisplay
                         className={"download-display"}
                         title={"Download"}
+
                         overlayText={downloadOverlayText}
-                        data={[...downloadResults.map(value => value.averageDataPerSecond.value)]}
+                        data={[
+                            {
+                                name: "Download",
+                                data: downloadResults.map(value => value.averageDataPerSecond.value)
+                            }
+                        ]}
                     />
                     <ScatterDisplay
                         className={"latency-display"}
                         title={"Latency"}
                         overlayText={latencyOverlayText}
-                        data={{latency: [...latencyMeasurements.map(value => value.latency)]}}
+                        data={[
+                            {
+                                name: "Latency",
+                                data: latencyMeasurements.map(value => [value.timestamp, value.latency])
+                            }
+                        ]}
                     />
                     <PlotDisplay
                         className={"upload-display"}
                         title={"Upload"}
                         overlayText={uploadOverlayText}
-                        data={[...uploadResults.map(value => value.averageDataPerSecond.value)]}
+                        data={[
+                            {
+                                name: "Upload",
+                                data: uploadResults.map(value => value.averageDataPerSecond.value)
+                            }
+                        ]}
                     />
                 </Stack>
                 {

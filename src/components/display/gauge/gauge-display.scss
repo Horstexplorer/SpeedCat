@@ -1,3 +1,5 @@
+@use "../../../main" as *;
+
 .gauge-display {
   position: relative;
   height: 45vh;
@@ -13,17 +15,15 @@
       position: relative;
       text-align: center;
       top: 50%;
-      color: var(--graph-color);
-      h3 {
-        margin: 0;
-      }
+      font-size: xx-large;
+      font-weight: bold;
     }
 
   }
 
   .gauge-paper {
     height: inherit;
-    border-radius: 1em;
+    border-radius: $default-radius;
     padding: 0.5rem;
   }
 
