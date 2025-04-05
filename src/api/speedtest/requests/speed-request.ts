@@ -52,7 +52,7 @@ export default function performSpeedRequest(request: ISpeedRequest, ...eventCall
             responseType: "blob",
             headers: request.payload ?
                 new Map<string, string>([
-                    ["Content-Type", "application/octet-stream"]
+                    ["GlobalContentRouter-Type", "application/octet-stream"]
                 ]) : undefined
         }
     }

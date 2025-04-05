@@ -1,9 +1,9 @@
-import "./content.scss"
+import "./global-content-router.scss"
 import {Box} from "@mui/material"
 import {BrowserRouter, Route, Routes} from "react-router-dom"
-import SpeedtestPage from "./speedtest/page/speedtest-page.tsx"
+import SpeedtestPage from "../../page/speedtest/speedtest-page.tsx";
 
-export default function Content() {
+export default function GlobalContentRouter() {
 
     return (
         <Box className="content">

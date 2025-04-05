@@ -1,17 +1,17 @@
+import {DataUnit, DataUnitBase, DataUnits, DataUnitType} from "../../api/misc/units/types/data-units"
+import Value from "../../api/misc/units/value"
 import "./speedtest-configurator.scss"
 import {Box, Grid2, IconButton, Paper, Stack, Typography} from "@mui/material"
-import InputText from "../../../input/text/input-text.tsx"
 import RotateLeftIcon from '@mui/icons-material/RotateLeft'
-import NormalInputSlider from "../../../input/normal-slider/normal-input-slider.tsx"
-import InputSelect from "../../../input/select/input-select.tsx"
-import InputSwitch from "../../../input/switch/input-switch.tsx"
-import useDataUnitStore from "../../../../state/configuration/data-unit-state.ts"
-import {DataUnit, DataUnitBase, DataUnits, DataUnitType} from "../../../../api/misc/units/types/data-units.ts"
-import useTestFileConfigurationStore from "../../../../state/configuration/test-file-configuration-state.ts"
-import useLatencyTestStore from "../../../../state/configuration/latency-test-state.ts"
-import useDownloadSpeedTestStore from "../../../../state/configuration/download-speed-test-state.ts"
-import useUploadSpeedTestStore from "../../../../state/configuration/upload-speed-test-state.ts"
-import Value from "../../../../api/misc/units/value.ts";
+import InputSwitch from "../inputs/switch/input-switch.tsx";
+import InputSelect from "../inputs/select/input-select.tsx";
+import InputText from "../inputs/text/input-text.tsx";
+import NormalInputSlider from "../inputs/normal-slider/normal-input-slider.tsx";
+import useUploadSpeedTestStore from "../../state/configuration/upload-speed-test-state.ts";
+import useDownloadSpeedTestStore from "../../state/configuration/download-speed-test-state.ts";
+import useLatencyTestStore from "../../state/configuration/latency-test-state.ts";
+import useTestFileConfigurationStore from "../../state/configuration/test-file-configuration-state.ts";
+import useDataUnitStore from "../../state/configuration/data-unit-state.ts";
 
 export default function SpeedtestConfigurator() {
 

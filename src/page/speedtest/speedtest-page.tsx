@@ -1,25 +1,27 @@
 import "./speedtest-page.scss"
 import {Box, Button, Stack} from "@mui/material"
-import useTestFileConfigurationStore from "../../../../state/configuration/test-file-configuration-state.ts"
-import useDataUnitStore from "../../../../state/configuration/data-unit-state.ts";
-import useLatencyTestStore from "../../../../state/configuration/latency-test-state.ts";
-import useDownloadSpeedTestStore from "../../../../state/configuration/download-speed-test-state.ts";
-import useUploadSpeedTestStore from "../../../../state/configuration/upload-speed-test-state.ts";
-import GaugeDisplay from "../../../display/gauge/gauge-display.tsx";
-import PlotDisplay from "../../../display/plot/plot-display.tsx";
-import ScatterDisplay from "../../../display/scatter/scatter-display.tsx";
 import {useState} from "react";
-import LatencyTest from "../../../../api/speedtest/tests/latency/latency-test.ts";
-import {ILatencyMeasurementEvent} from "../../../../api/speedtest/calculations/latency-calculation.ts";
-import DownloadSpeedTest from "../../../../api/speedtest/tests/speed/download-speed-test.ts";
+import useTestFileConfigurationStore from "../../state/configuration/test-file-configuration-state.ts";
+import useDownloadSpeedTestStore from "../../state/configuration/download-speed-test-state.ts";
+import useLatencyTestStore from "../../state/configuration/latency-test-state.ts";
+import useUploadSpeedTestStore from "../../state/configuration/upload-speed-test-state.ts";
+import useDataUnitStore from "../../state/configuration/data-unit-state";
+import LatencyTest from "../../api/speedtest/tests/latency/latency-test.ts";
+import DownloadSpeedTest from "../../api/speedtest/tests/speed/download-speed-test.ts";
+import UploadSpeedTest from "../../api/speedtest/tests/speed/upload-speed-test.ts";
+import {generateRandomData} from "../../api/misc/data-generator.ts";
+import { ILatencyMeasurementEvent } from "../../api/speedtest/calculations/latency-calculation.ts";
+import Value from "../../api/misc/units/value.ts";
+import { DataUnits } from "../../api/misc/units/types/data-units.ts";
 import {
-    calculateSpeedCalculationResult, ISpeedCalculationResult,
+    calculateSpeedCalculationResult,
+    ISpeedCalculationResult,
     ISpeedChangeDeltaEvent
-} from "../../../../api/speedtest/calculations/speed-calculation.ts";
-import UploadSpeedTest from "../../../../api/speedtest/tests/speed/upload-speed-test.ts";
-import {generateRandomData} from "../../../../api/misc/data-generator.ts";
-import {DataUnits} from "../../../../api/misc/units/types/data-units.ts";
-import Value from "../../../../api/misc/units/value.ts";
+} from "../../api/speedtest/calculations/speed-calculation.ts";
+import GaugeDisplay from "../../components/graphs/gauge/gauge-display.tsx";
+import PlotDisplay from "../../components/graphs/plot/plot-display.tsx";
+import ScatterDisplay from "../../components/graphs/scatter/scatter-display.tsx";
+
 
 export default function SpeedtestPage() {
 

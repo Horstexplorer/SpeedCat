@@ -1,13 +1,13 @@
 import {createRoot} from 'react-dom/client'
 import "./main.scss"
 import {CssBaseline} from "@mui/material"
-import Header from "./components/page/header.tsx"
-import Content from "./components/page/content.tsx"
+import PageGlobalHeader from "./components/header/global-header.tsx";
+import GlobalContentRouter from "./components/router/global-content-router.tsx";
 
 createRoot(document.getElementById('root')!).render(
     <>
         <CssBaseline/>
-        <Header/>
-        <Content/>
+        <PageGlobalHeader/>
+        <GlobalContentRouter/>
     </>
 )
