@@ -60,7 +60,8 @@ export default function ScatterDisplay(properties: IScatterDisplayProperties) {
     }
 
     return (
-        <Box id={properties.id} className={properties.className ? `scatter-display ${properties.className}` : "scatter-display"}>
+        <Box id={properties.id}
+             className={properties.className ? `scatter-display ${properties.className}` : "scatter-display"}>
             <Box className={"scatter-overlay"}>
                 <Box className={"scatter-overlay-content"}>
                     {properties.overlayText}
@@ -76,10 +77,10 @@ export default function ScatterDisplay(properties: IScatterDisplayProperties) {
                     }
                     <Grid2 className={"scatter-graph"} size={1}>
                         <Chart
-                            height={"100%"}
+                            type={"scatter"}
                             options={options}
                             series={properties.data}
-                            type={"scatter"}
+                            height={"100%"}
                         />
                     </Grid2>
                 </Grid2>
