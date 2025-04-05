@@ -1,5 +1,5 @@
 import "./scatter-display.scss"
-import {Box, Grid2, Paper} from "@mui/material"
+import {Box, Paper, Stack} from "@mui/material"
 import Chart from "react-apexcharts";
 import {ApexOptions} from "apexcharts";
 
@@ -60,31 +60,28 @@ export default function ScatterDisplay(properties: IScatterDisplayProperties) {
     }
 
     return (
-        <Box id={properties.id}
-             className={properties.className ? `scatter-display ${properties.className}` : "scatter-display"}>
+        <Paper
+            id={properties.id}
+            className={properties.className ? `scatter-display ${properties.className}` : "scatter-display"}
+            elevation={5}>
             <Box className={"scatter-overlay"}>
-                <Box className={"scatter-overlay-content"}>
-                    {properties.overlayText}
-                </Box>
+                {properties.overlayText}
             </Box>
-            <Paper className={"scatter-paper"} elevation={5}>
-                <Grid2 className={"scatter-paper-grid"} container columns={1}>
-                    {
-                        properties.title ?
-                            <Grid2 className={"scatter-title"} size={1}>
-                                {properties.title}
-                            </Grid2> : <></>
-                    }
-                    <Grid2 className={"scatter-graph"} size={1}>
-                        <Chart
-                            type={"scatter"}
-                            options={options}
-                            series={properties.data}
-                            height={"100%"}
-                        />
-                    </Grid2>
-                </Grid2>
-            </Paper>
-        </Box>
+            <Stack className={"scatter-stack"}>
+                {
+                    properties.title ?
+                        <Box className={"scatter-title"}>
+                            {properties.title}
+                        </Box> : <></>
+                }
+                <Chart
+                    className={"scatter-chart"}
+                    type={"scatter"}
+                    options={options}
+                    series={properties.data}
+                    height={"100%"}
+                />
+            </Stack>
+        </Paper>
     )
 }

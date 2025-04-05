@@ -63,22 +63,22 @@ export default function GaugeDisplay(properties: IDisplayGaugeProperties) {
     }
 
     return (
-        <Box id={properties.id}
-             className={properties.className ? `gauge-display ${properties.className}` : "gauge-display"}>
+        <Paper
+            id={properties.id}
+            className={properties.className ? `gauge-display ${properties.className}` : "gauge-display"}
+            elevation={5}
+        >
             <Box className={"gauge-overlay"}>
-                <Box className={"gauge-overlay-content"}>
-                    {properties.overlayText}
-                </Box>
+                {properties.overlayText}
             </Box>
-            <Paper className={"gauge-paper"} elevation={5}>
-                <Chart
-                    type={"radialBar"}
-                    options={options}
-                    series={properties.data.map(entry => entry.percentage)}
-                    height={"100%"}
-                />
-            </Paper>
-        </Box>
+            <Chart
+                className={"gauge-graph"}
+                type={"radialBar"}
+                options={options}
+                series={properties.data.map(entry => entry.percentage)}
+                height={"100%"}
+            />
+        </Paper>
     )
 
 }

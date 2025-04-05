@@ -1,7 +1,7 @@
 import "./plot-display.scss"
 import Chart from "react-apexcharts"
 
-import {Box, Grid2, Paper} from "@mui/material"
+import {Box, Paper, Stack} from "@mui/material"
 import {ApexOptions} from "apexcharts";
 
 export interface IPlotDisplayData {
@@ -64,30 +64,29 @@ export default function PlotDisplay(properties: IPlotDisplayProperties){
     }
 
     return (
-        <Box id={properties.id} className={properties.className ? `plot-display ${properties.className}` : "plot-display"}>
+        <Paper
+            id={properties.id}
+            className={properties.className ? `plot-display ${properties.className}` : "plot-display"}
+            elevation={5}>
             <Box className={"plot-overlay"}>
-                <Box className={"plot-overlay-content"}>
-                    {properties.overlayText}
-                </Box>
+                {properties.overlayText}
             </Box>
-            <Paper className={"plot-paper"} elevation={5}>
-                <Grid2 className={"plot-paper-grid"} container columns={1}>
-                    {
-                        properties.title ?
-                            <Grid2 className={"plot-title"} size={1}>
-                                {properties.title}
-                            </Grid2> : <></>
-                    }
-                    <Grid2 className={"plot-graph"} size={1}>
-                        <Chart
-                            type={"line"}
-                            options={options}
-                            series={properties.data}
-                            height={"100%"}
-                        />
-                    </Grid2>
-                </Grid2>
-            </Paper>
-        </Box>
+            <Stack className={"plot-stack"}>
+                {
+                    properties.title ?
+                        <Box className={"plot-title"}>
+                            {properties.title}
+                        </Box> : <></>
+                }
+
+                <Chart
+                    className={"plot-graph"}
+                    type={"line"}
+                    options={options}
+                    series={properties.data}
+                    height={"100%"}
+                />
+            </Stack>
+        </Paper>
     )
 }

@@ -5,6 +5,9 @@
   margin: 1rem;
 
   .gauge-display {
+
+    height: 45vh;
+
     .apexcharts-radial-series[seriesName="Download"] path {
       stroke: $fast_test-primary;
     }
@@ -14,6 +17,9 @@
   }
 
   .latency-display{
+
+    height: 20vh;
+
     .scatter-title {
       color: $fast_test-secondary;
     }
@@ -24,6 +30,9 @@
   }
 
   .download-display{
+
+    height: 20vh;
+
     .plot-title {
       color: $fast_test-primary;
     }
@@ -34,6 +43,9 @@
   }
 
   .upload-display{
+
+    height: 20vh;
+
     .plot-title {
       color: $fast_test-tertiary;
     }

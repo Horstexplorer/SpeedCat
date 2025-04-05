@@ -75,7 +75,7 @@ export default function SpeedtestPage() {
     const [testIsRunning, setTestRunning] = useState<boolean>(false)
 
     const [gaugeValue, setGaugeValue] = useState<number[]>([0,0])
-    const [gaugeOverlayText, setGaugeOverlayText] = useState<string | undefined>()
+    const [gaugeOverlayText, setGaugeOverlayText] = useState<string | undefined>("SpeedCat")
 
     const [latencyMeasurements, setLatencyMeasurements] = useState<ILatencyMeasurementEvent[]>([])
     const [latencyOverlayText, setLatencyOverlayText] = useState<string | undefined>()
@@ -110,7 +110,7 @@ export default function SpeedtestPage() {
                     return [{ samples: 0, averageDataPerSecond: new Value(0, DataUnits.BYTE) }, downloadResult]
                 })
                 const displayValue = unitActions.convert(downloadResult.averageDataPerSecond)
-                setGaugeOverlayText(displayValue.toString())
+                setGaugeOverlayText(`${displayValue.toString()}/s`)
                 setGaugeValue([(displayValue.value / 10), 0])
 
                 downloadChangeDeltaBuffer = []
@@ -122,7 +122,7 @@ export default function SpeedtestPage() {
                     return [{ samples: 0, averageDataPerSecond: new Value(0, DataUnits.BYTE) }, uploadResult]
                 })
                 const displayValue = unitActions.convert(uploadResult.averageDataPerSecond)
-                setGaugeOverlayText(displayValue.toString())
+                setGaugeOverlayText(`${displayValue.toString()}/s`)
                 setGaugeValue(previous => [previous[0], (displayValue.value / 10)])
 
                 uploadChangeDeltaBuffer = []
@@ -147,7 +147,7 @@ export default function SpeedtestPage() {
                 },
                 testRunInput: {
                     changeDelta: value => downloadChangeDeltaBuffer.push(value),
-                    result: value => setDownloadOverlayText(unitActions.convert(value.averageDataPerSecond).toString())
+                    result: value => setDownloadOverlayText(`${unitActions.convert(value.averageDataPerSecond).toString()}/s`)
                 }
             })
             await new Promise(resolve => setTimeout(resolve, 1000))
@@ -157,7 +157,7 @@ export default function SpeedtestPage() {
                 },
                 testRunInput: {
                     changeDelta: value => uploadChangeDeltaBuffer.push(value),
-                    result: value => setUploadOverlayText(unitActions.convert(value.averageDataPerSecond).toString())
+                    result: value => setUploadOverlayText(`${unitActions.convert(value.averageDataPerSecond).toString()}/s`)
                 }
             })
         }catch (e) {
@@ -166,8 +166,8 @@ export default function SpeedtestPage() {
 
         clearInterval(updateLoop)
         doPerformUpdate()
-
-        setGaugeOverlayText(undefined)
+        setGaugeValue([0,0])
+        setGaugeOverlayText("SpeedCat")
         setTestRunning(false)
     }
 

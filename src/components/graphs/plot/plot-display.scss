@@ -1,41 +1,33 @@
 @use "../../../main" as *;
 
 .plot-display {
+
   position: relative;
-  height: 20vh;
-  width: 100%;
+  border-radius: $default-radius;
+  padding: 0.5rem;
+
+  .plot-stack {
+    height: 100%;
+  }
+
+  .plot-title {
+    text-align: center;
+    font-size: large;
+    font-weight: bold;
+  }
 
   .plot-overlay {
     position: absolute;
-    height: inherit;
-    width: 100%;
-    padding: 0.5rem;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
 
-    .plot-overlay-content {
-      position: relative;
-      text-align: center;
-      top: 50%;
-      font-size: xx-large;
-      font-weight: bold;
-    }
-
-  }
-
-  .plot-paper {
-    height: inherit;
-    border-radius: $default-radius;
-    padding: 0.5rem;
-
-    .plot-paper-grid {
-      height: 100%;
-    }
-
-    .plot-title {
-      text-align: center;
-      font-size: x-large;
-      font-weight: bold;
-    }
-
+    text-align: center;
+    align-content: center;
+    font-size: large;
+    font-weight: bold;
+    z-index: 1001;
   }
 
 }
