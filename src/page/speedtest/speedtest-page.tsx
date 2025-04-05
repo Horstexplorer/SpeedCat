@@ -1,5 +1,5 @@
 import "./speedtest-page.scss"
-import {Box, Button, Stack} from "@mui/material"
+import {Box, Button, Grid2, Stack} from "@mui/material"
 import {useState} from "react";
 import useTestFileConfigurationStore from "../../state/configuration/test-file-configuration-state.ts";
 import useDownloadSpeedTestStore from "../../state/configuration/download-speed-test-state.ts";
@@ -188,42 +188,48 @@ export default function SpeedtestPage() {
                         }
                     ]}
                 />
-                <Stack direction={"row"} spacing={1}>
-                    <PlotDisplay
-                        className={"download-display"}
-                        title={"Download"}
+                <Grid2 container columns={3} spacing={1}>
+                    <Grid2 size={1}>
+                        <PlotDisplay
+                            className={"download-display"}
+                            title={"Download"}
 
-                        overlayText={downloadOverlayText}
-                        data={[
-                            {
-                                name: "Download",
-                                data: downloadResults.map(value => value.averageDataPerSecond.value)
-                            }
-                        ]}
-                    />
-                    <ScatterDisplay
-                        className={"latency-display"}
-                        title={"Latency"}
-                        overlayText={latencyOverlayText}
-                        data={[
-                            {
-                                name: "Latency",
-                                data: latencyMeasurements.map(value => [value.timestamp, value.latency])
-                            }
-                        ]}
-                    />
-                    <PlotDisplay
-                        className={"upload-display"}
-                        title={"Upload"}
-                        overlayText={uploadOverlayText}
-                        data={[
-                            {
-                                name: "Upload",
-                                data: uploadResults.map(value => value.averageDataPerSecond.value)
-                            }
-                        ]}
-                    />
-                </Stack>
+                            overlayText={downloadOverlayText}
+                            data={[
+                                {
+                                    name: "Download",
+                                    data: downloadResults.map(value => value.averageDataPerSecond.value)
+                                }
+                            ]}
+                        />
+                    </Grid2>
+                    <Grid2 size={1}>
+                        <ScatterDisplay
+                            className={"latency-display"}
+                            title={"Latency"}
+                            overlayText={latencyOverlayText}
+                            data={[
+                                {
+                                    name: "Latency",
+                                    data: latencyMeasurements.map(value => [value.timestamp, value.latency])
+                                }
+                            ]}
+                        />
+                    </Grid2>
+                    <Grid2 size={1}>
+                        <PlotDisplay
+                            className={"upload-display"}
+                            title={"Upload"}
+                            overlayText={uploadOverlayText}
+                            data={[
+                                {
+                                    name: "Upload",
+                                    data: uploadResults.map(value => value.averageDataPerSecond.value)
+                                }
+                            ]}
+                        />
+                    </Grid2>
+                </Grid2>
                 {
                     !testIsRunning ?
                         <Button className={"test-trigger"} variant="contained" onClick={runTestSuite}>
