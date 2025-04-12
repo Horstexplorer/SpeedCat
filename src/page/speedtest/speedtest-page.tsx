@@ -1,5 +1,5 @@
 import "./speedtest-page.scss"
-import {Box, Button, Grid2, Stack} from "@mui/material"
+import {Box, Button, Grid, Stack} from "@mui/material"
 import {useState} from "react";
 import useTestFileConfigurationStore from "../../state/configuration/test-file-configuration-state.ts";
 import useDownloadSpeedTestStore from "../../state/configuration/download-speed-test-state.ts";
@@ -188,8 +188,8 @@ export default function SpeedtestPage() {
                         }
                     ]}
                 />
-                <Grid2 container columns={3} spacing={1}>
-                    <Grid2 size={1}>
+                <Grid container columns={3} spacing={1}>
+                    <Grid size={1}>
                         <PlotDisplay
                             className={"download-display"}
                             title={"Download"}
@@ -202,8 +202,8 @@ export default function SpeedtestPage() {
                                 }
                             ]}
                         />
-                    </Grid2>
-                    <Grid2 size={1}>
+                    </Grid>
+                    <Grid size={1}>
                         <ScatterDisplay
                             className={"latency-display"}
                             title={"Latency"}
@@ -215,8 +215,8 @@ export default function SpeedtestPage() {
                                 }
                             ]}
                         />
-                    </Grid2>
-                    <Grid2 size={1}>
+                    </Grid>
+                    <Grid size={1}>
                         <PlotDisplay
                             className={"upload-display"}
                             title={"Upload"}
@@ -228,8 +228,8 @@ export default function SpeedtestPage() {
                                 }
                             ]}
                         />
-                    </Grid2>
-                </Grid2>
+                    </Grid>
+                </Grid>
                 {
                     !testIsRunning ?
                         <Button className={"test-trigger"} variant="contained" onClick={runTestSuite}>

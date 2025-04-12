@@ -1,7 +1,7 @@
 import {DataUnit, DataUnitBase, DataUnits, DataUnitType} from "../../api/misc/units/types/data-units"
 import Value from "../../api/misc/units/value"
 import "./speedtest-configurator.scss"
-import {Box, Grid2, IconButton, Paper, Stack, Typography} from "@mui/material"
+import {Box, Grid, IconButton, Paper, Stack, Typography} from "@mui/material"
 import RotateLeftIcon from '@mui/icons-material/RotateLeft'
 import InputSwitch from "../inputs/switch/input-switch.tsx";
 import InputSelect from "../inputs/select/input-select.tsx";
@@ -68,8 +68,8 @@ export default function SpeedtestConfigurator() {
                             <RotateLeftIcon />
                         </IconButton>
                     </Stack>
-                    <Grid2 container spacing={2} columns={2} size={1}>
-                        <Grid2 size={1} className={"center-align"}>
+                    <Grid container spacing={2} columns={2} size={1}>
+                        <Grid size={1} className={"center-align"}>
                             <Typography>
                                 Binary
                                 <InputSwitch id={"format-using-si-values"}
@@ -86,8 +86,8 @@ export default function SpeedtestConfigurator() {
                                 />
                                 Byte
                             </Typography>
-                        </Grid2>
-                        <Grid2 size={1} className={"center-align"}>
+                        </Grid>
+                        <Grid size={1} className={"center-align"}>
                             <Typography>
                                 Unit Selection
                             </Typography>
@@ -96,8 +96,8 @@ export default function SpeedtestConfigurator() {
                                          availableValues={selectableDataUnitDisplayValues}
                                          onValueChange={value => unitActions.setUnit(DataUnits.values().find(dataUnit => dataUnit.uid == value))}
                             />
-                        </Grid2>
-                    </Grid2>
+                        </Grid>
+                    </Grid>
                 </Paper>
 
                 <Paper elevation={5} className={"configurator-paper latency-test-configurator"}>
