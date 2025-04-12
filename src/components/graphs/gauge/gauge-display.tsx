@@ -11,7 +11,7 @@ export interface IDisplayGaugeData {
 export interface IDisplayGaugeVisualProperties {
     animation?: {
         enabled?: boolean,
-        speed?: number
+        interval?: number
     }
 }
 
@@ -40,7 +40,7 @@ export default function GaugeDisplay(properties: IDisplayGaugeProperties) {
             animations: {
                 enabled: properties.visualProperties?.animation?.enabled,
                 dynamicAnimation: {
-                    speed: properties.visualProperties?.animation?.speed
+                    speed: properties.visualProperties?.animation?.interval
                 }
             }
         },

@@ -6,6 +6,10 @@
   .configurator-paper {
     border-radius: $default-radius;
     padding: 1rem;
+
+    .configurator-title {
+      font-weight: bold;
+    }
   }
 
   .center-align {

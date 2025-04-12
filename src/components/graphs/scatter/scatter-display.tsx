@@ -11,7 +11,7 @@ export interface IScatterDisplayData {
 export interface IScatterDisplayVisualProperties {
     animation?: {
         enabled?: boolean,
-        speed?: number
+        interval?: number
     }
 }
 
@@ -41,7 +41,7 @@ export default function ScatterDisplay(properties: IScatterDisplayProperties) {
             animations: {
                 enabled: properties.visualProperties?.animation?.enabled,
                 dynamicAnimation: {
-                    speed: properties.visualProperties?.animation?.speed
+                    speed: properties.visualProperties?.animation?.interval
                 }
             }
         },

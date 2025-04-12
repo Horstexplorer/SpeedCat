@@ -83,8 +83,7 @@ const useLatencyTestStore = create<ILatencyTestStore>()(
                     set({...get(), _ctrl: {...get()._ctrl, readyToBeUsed: true}})
                 },
                 resetState: state => {
-                    const defaults = state || latencyTestStateDefaults
-                    set({...get(), ...defaults, _ctrl: {...get()._ctrl, readyToBeUsed: false}})
+                    set({...get(), ...state ?? latencyTestStateDefaults, _ctrl: {...get()._ctrl, readyToBeUsed: false}})
                 }
             }
         }),

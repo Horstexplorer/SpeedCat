@@ -64,8 +64,7 @@ const useDataUnitStore = create<IDataUnitStore>()(
             },
             _ctrl: {
                 resetState: state => {
-                    const defaults = state || dataUnitStateDefaults
-                    set({...get(), ...defaults})
+                    set({...get(), ...state ?? dataUnitStateDefaults})
                 }
             }
         }),

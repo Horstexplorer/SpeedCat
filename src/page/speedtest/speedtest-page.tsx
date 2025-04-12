@@ -21,9 +21,12 @@ import {
 import GaugeDisplay from "../../components/graphs/gauge/gauge-display.tsx";
 import PlotDisplay from "../../components/graphs/plot/plot-display.tsx";
 import ScatterDisplay from "../../components/graphs/scatter/scatter-display.tsx";
+import useInterfaceStore from "../../state/configuration/interface-state.ts";
 
 
 export default function SpeedtestPage() {
+
+    const {updateIntervalMs} = useInterfaceStore()
 
     const {_actions: unitActions} = useDataUnitStore()
 
@@ -111,7 +114,8 @@ export default function SpeedtestPage() {
                 })
                 const displayValue = unitActions.convert(downloadResult.averageDataPerSecond)
                 setGaugeOverlayText(`${displayValue.toString()}/s`)
-                setGaugeValue([(displayValue.value / 10), 0])
+                const gaugeFactor = Math.min(Math.max((displayValue.value / 1000), 0), 1);
+                setGaugeValue([gaugeFactor, 0])
 
                 downloadChangeDeltaBuffer = []
             } else if (uploadChangeDeltaBuffer.length > 0) {
@@ -123,12 +127,13 @@ export default function SpeedtestPage() {
                 })
                 const displayValue = unitActions.convert(uploadResult.averageDataPerSecond)
                 setGaugeOverlayText(`${displayValue.toString()}/s`)
-                setGaugeValue(previous => [previous[0], (displayValue.value / 10)])
+                const gaugeFactor = Math.min(Math.max((displayValue.value / 1000), 0), 1);
+                setGaugeValue(previous => [previous[0], gaugeFactor])
 
                 uploadChangeDeltaBuffer = []
             }
         }
-        const updateLoop = setInterval(() => doPerformUpdate(), 250)
+        const updateLoop = setInterval(() => doPerformUpdate(), updateIntervalMs)
 
         try {
             await latencyTest.run({
@@ -177,6 +182,12 @@ export default function SpeedtestPage() {
                 <GaugeDisplay
                     className={"speed-display"}
                     overlayText={gaugeOverlayText}
+                    visualProperties={{
+                        animation: {
+                            enabled: true,
+                            interval: updateIntervalMs
+                        }
+                    }}
                     data={[
                         {
                             name: "Download",
@@ -193,8 +204,13 @@ export default function SpeedtestPage() {
                         <PlotDisplay
                             className={"download-display"}
                             title={"Download"}
-
                             overlayText={downloadOverlayText}
+                            visualProperties={{
+                                animation: {
+                                    enabled: true,
+                                    interval: updateIntervalMs
+                                }
+                            }}
                             data={[
                                 {
                                     name: "Download",
@@ -208,6 +224,12 @@ export default function SpeedtestPage() {
                             className={"latency-display"}
                             title={"Latency"}
                             overlayText={latencyOverlayText}
+                            visualProperties={{
+                                animation: {
+                                    enabled: true,
+                                    interval: updateIntervalMs
+                                }
+                            }}
                             data={[
                                 {
                                     name: "Latency",
@@ -221,6 +243,12 @@ export default function SpeedtestPage() {
                             className={"upload-display"}
                             title={"Upload"}
                             overlayText={uploadOverlayText}
+                            visualProperties={{
+                                animation: {
+                                    enabled: true,
+                                    interval: updateIntervalMs
+                                }
+                            }}
                             data={[
                                 {
                                     name: "Upload",

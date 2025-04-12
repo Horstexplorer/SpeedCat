@@ -101,8 +101,7 @@ const useDownloadSpeedTestStore = create<IDownloadSpeedTestStore>()(
                     set({...get(), _ctrl: {...get()._ctrl, readyToBeUsed: true}})
                 },
                 resetState: state => {
-                    const defaults = state || downloadSpeedTestStateDefaults
-                    set({...get(), ...defaults, _ctrl: {...get()._ctrl, readyToBeUsed: false}})
+                    set({...get(), ...state ?? downloadSpeedTestStateDefaults, _ctrl: {...get()._ctrl, readyToBeUsed: false}})
                 }
             }
         }),

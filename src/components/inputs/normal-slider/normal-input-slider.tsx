@@ -1,6 +1,6 @@
 import "./normal-input-slider.scss"
-import {Mark} from "@mui/material/Slider/useSlider.types"
 import InputSlider from "../slider/input-slider.tsx"
+import {Mark} from "@mui/material/Slider/useSlider.types";
 
 export interface NonLinearSliderProperties {
     id?: string
@@ -12,6 +12,7 @@ export interface NonLinearSliderProperties {
     value?: number
     disabled?: boolean
     onValueChange?: (value: number) => void
+    label?: string
 }
 
 export interface ScalableMark extends Mark {
@@ -45,10 +46,11 @@ export default function NormalInputSlider(properties: NonLinearSliderProperties)
                      className={properties.className ? `non-linear-input-slider ${properties.className}` : "non-linear-input-slider"}
                      min={0} max={convertedMarks[convertedMarks.length - 1].value} step={properties.step}
                      marks={convertedMarks}
-                     value={getIndexByActualValue(properties.value || 0)}
+                     value={getIndexByActualValue(properties.value ?? 0)}
                      scale={getActualByIndexValue}
                      disabled={properties.disabled}
                      onValueChange={(value: number) => properties.onValueChange ? properties.onValueChange(getActualByIndexValue(value)) : {}}
+                     label={properties.label}
         />
     )
 }

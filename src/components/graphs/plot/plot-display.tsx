@@ -12,7 +12,7 @@ export interface IPlotDisplayData {
 export interface IPlotDisplayVisualProperties {
     animation?: {
         enabled?: boolean,
-        speed?: number
+        interval?: number
     }
 }
 
@@ -42,7 +42,7 @@ export default function PlotDisplay(properties: IPlotDisplayProperties){
             animations: {
                 enabled: properties.visualProperties?.animation?.enabled,
                 dynamicAnimation: {
-                    speed: properties.visualProperties?.animation?.speed
+                    speed: properties.visualProperties?.animation?.interval
                 }
             }
         },

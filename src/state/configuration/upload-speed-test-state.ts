@@ -101,8 +101,7 @@ const useUploadSpeedTestStore = create<IUploadSpeedTestStore>()(
                     set({...get(), _ctrl: {...get()._ctrl, readyToBeUsed: true}})
                 },
                 resetState: state => {
-                    const defaults = state || uploadSpeedTestStateDefaults
-                    set({...get(), ...defaults, _ctrl: {...get()._ctrl, readyToBeUsed: false}})
+                    set({...get(), ...state ?? uploadSpeedTestStateDefaults, _ctrl: {...get()._ctrl, readyToBeUsed: false}})
                 }
             }
         }),
