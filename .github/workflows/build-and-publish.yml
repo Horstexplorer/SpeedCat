@@ -1,15 +1,34 @@
 name: Build and Publish as Docker Image
 
 on:
-  workflow_dispatch:
+  release:
+    types: [ published ]
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  build:
+  provisioning:
+    name: Provision pipeline run details
+    outputs:
+      IMAGE_NAME: ghcr.io/${{ github.repository }}
+      RELEASE_TAG: ${{ steps.env_setup.outputs.RELEASE_TAG }}
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set environment variables
+        id: env_setup
+        run: |
+          echo "RELEASE_TAG=${{github.event.release.tag_name}}" >> $GITHUB_OUTPUT
+
+  build_and_publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    needs: [ provisioning ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,22 +56,12 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Prepare Tags with Docker Metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=ref,event=pr
-            type=sha,prefix=
-
-      - name: Build and Push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and publish Docker images#
+        run: |
+          docker build \
+            -t ${{ needs.provisioning.outputs.IMAGE_NAME }}:latest \
+            -t ${{ needs.provisioning.outputs.IMAGE_NAME }}:${{ needs.provisioning.outputs.RELEASE_TAG }}
+          
+          docker push ${{ needs.provisioning.outputs.IMAGE_NAME }}:latest
+          docker push ${{ needs.provisioning.outputs.IMAGE_NAME }}:${{ needs.provisioning.outputs.RELEASE_TAG }}
+          
