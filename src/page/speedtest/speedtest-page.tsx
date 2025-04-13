@@ -22,11 +22,11 @@ import GaugeDisplay from "../../components/graphs/gauge/gauge-display.tsx";
 import PlotDisplay from "../../components/graphs/plot/plot-display.tsx";
 import ScatterDisplay from "../../components/graphs/scatter/scatter-display.tsx";
 import useInterfaceStore from "../../state/configuration/interface-state.ts";
-
+import {clamp} from "../../api/misc/clamp.ts";
 
 export default function SpeedtestPage() {
 
-    const {updateIntervalMs} = useInterfaceStore()
+    const {updateIntervalMs, gauge: gaugeSettings} = useInterfaceStore()
 
     const {_actions: unitActions} = useDataUnitStore()
 
@@ -104,6 +104,10 @@ export default function SpeedtestPage() {
         setUploadResults([])
         setUploadOverlayText(undefined)
 
+        function calculateGaugeFactor(value: number) {
+            return clamp(value / gaugeSettings.maxNumericValue, 0, 1)
+        }
+
         function doPerformUpdate() {
             if (downloadChangeDeltaBuffer.length > 0) {
                 const downloadResult= calculateSpeedCalculationResult(downloadChangeDeltaBuffer)
@@ -114,8 +118,7 @@ export default function SpeedtestPage() {
                 })
                 const displayValue = unitActions.convert(downloadResult.averageDataPerSecond)
                 setGaugeOverlayText(`${displayValue.toString()}/s`)
-                const gaugeFactor = Math.min(Math.max((displayValue.value / 1000), 0), 1);
-                setGaugeValue([gaugeFactor, 0])
+                setGaugeValue([calculateGaugeFactor(displayValue.value), 0])
 
                 downloadChangeDeltaBuffer = []
             } else if (uploadChangeDeltaBuffer.length > 0) {
@@ -127,8 +130,7 @@ export default function SpeedtestPage() {
                 })
                 const displayValue = unitActions.convert(uploadResult.averageDataPerSecond)
                 setGaugeOverlayText(`${displayValue.toString()}/s`)
-                const gaugeFactor = Math.min(Math.max((displayValue.value / 1000), 0), 1);
-                setGaugeValue(previous => [previous[0], gaugeFactor])
+                setGaugeValue(previous => [previous[0], calculateGaugeFactor(displayValue.value)])
 
                 uploadChangeDeltaBuffer = []
             }
@@ -183,6 +185,7 @@ export default function SpeedtestPage() {
                     className={"speed-display"}
                     overlayText={gaugeOverlayText}
                     visualProperties={{
+                        scale: gaugeSettings.scale,
                         animation: {
                             enabled: true,
                             interval: updateIntervalMs
@@ -191,11 +194,11 @@ export default function SpeedtestPage() {
                     data={[
                         {
                             name: "Download",
-                            percentage: gaugeValue[0]
+                            factor: gaugeValue[0]
                         },
                         {
                             name: "Upload",
-                            percentage: gaugeValue[1]
+                            factor: gaugeValue[1]
                         }
                     ]}
                 />

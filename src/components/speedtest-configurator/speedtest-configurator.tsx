@@ -15,10 +15,11 @@ import useDataUnitStore from "../../state/configuration/data-unit-state.ts";
 import useInterfaceStore, {UPDATE_INTERVAL_MS_OPTIONS} from "../../state/configuration/interface-state.ts";
 import Card from "../card/card.tsx";
 import CardHeader from "../card/card-header.tsx";
+import {GaugeVisualScale} from "../graphs/gauge/gauge-display.tsx";
 
 export default function SpeedtestConfigurator() {
 
-    const {updateIntervalMs, _actions: interfaceActions, _ctrl: interfaceControls} = useInterfaceStore()
+    const {updateIntervalMs, gauge: gaugeSettings, _actions: interfaceActions, _ctrl: interfaceControls} = useInterfaceStore()
 
     const {base: unitBase, type: unitType, unit, _actions: unitActions, _ctrl: unitControls} = useDataUnitStore()
 
@@ -108,6 +109,31 @@ export default function SpeedtestConfigurator() {
                                        value={updateIntervalMs}
                                        onValueChange={value => interfaceActions.setUpdateInterval(value)}
                     />
+                    <Divider/>
+                    <Grid container spacing={2} columns={2} size={1}>
+                        <Grid size={1} className={"center-align"}>
+                            <InputText id={"gauge-max-value"}
+                                       label={"max. Value Gauge Display"}
+                                       type={"number"}
+                                       value={gaugeSettings.maxNumericValue}
+                                       onValueChange={(value: string) => interfaceActions.setGaugeMaxNumericValue(Number.parseInt(value))}
+                            />
+                        </Grid>
+
+                        <Grid size={1} className={"center-align"}>
+                            <Typography>
+                                Gauge Scale
+                            </Typography>
+                            <Typography>
+                                Linear
+                                <InputSwitch id={"gauge-scale"}
+                                             value={gaugeSettings.scale == GaugeVisualScale.LOGARITHMIC}
+                                             onValueChange={value => interfaceActions.setGaugeScale(value ? GaugeVisualScale.LOGARITHMIC : GaugeVisualScale.LINEAR)}
+                                />
+                                Logarithmic
+                            </Typography>
+                        </Grid>
+                    </Grid>
                     <Divider/>
                     <Grid container spacing={2} columns={2} size={1}>
                         <Grid size={1} className={"center-align"}>

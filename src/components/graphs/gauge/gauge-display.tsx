@@ -2,15 +2,22 @@ import "./gauge-display.scss"
 import {Box, Paper} from "@mui/material"
 import Chart from "react-apexcharts";
 import {ApexOptions} from "apexcharts";
+import {clamp} from "../../../api/misc/clamp.ts";
 
 export interface IDisplayGaugeData {
     name: string
-    percentage: number
+    factor: number
+}
+
+export enum GaugeVisualScale {
+    LINEAR,
+    LOGARITHMIC
 }
 
 export interface IDisplayGaugeVisualProperties {
+    scale?: GaugeVisualScale
     animation?: {
-        enabled?: boolean,
+        enabled?: boolean
         interval?: number
     }
 }
@@ -62,6 +69,24 @@ export default function GaugeDisplay(properties: IDisplayGaugeProperties) {
         labels: properties.data.map(entry => entry.name)
     }
 
+    function scaleFactor(value: number): number {
+        const factor = clamp(value, 0, 1)
+        switch (properties.visualProperties?.scale) {
+            case GaugeVisualScale.LOGARITHMIC: {
+                return scaleLogarithmic(factor)
+            }
+            default: {
+                return factor
+            }
+        }
+    }
+
+    function scaleLogarithmic(factor: number) {
+        if (factor == 0)
+            return 0
+        return Math.log10(factor * 100) / 2
+    }
+
     return (
         <Paper
             id={properties.id}
@@ -75,7 +100,7 @@ export default function GaugeDisplay(properties: IDisplayGaugeProperties) {
                 className={"gauge-graph"}
                 type={"radialBar"}
                 options={options}
-                series={properties.data.map(entry => entry.percentage)}
+                series={properties.data.map(entry => scaleFactor(entry.factor) * 100)}
                 height={"100%"}
             />
         </Paper>
