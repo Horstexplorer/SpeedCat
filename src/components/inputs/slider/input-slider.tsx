@@ -1,6 +1,11 @@
 import "./input-slider.scss"
 import {Box, Slider, Typography} from "@mui/material"
-import {Mark} from "@mui/material/Slider/useSlider.types"
+import {ReactNode} from "react";
+
+export interface Mark {
+    value: number
+    label?: ReactNode
+}
 
 export interface InputSliderProperties {
     id?: string
@@ -21,9 +26,9 @@ export default function InputSlider(properties: InputSliderProperties) {
         <Box className={properties.className ? `input-slider ${properties.className}` : "input-slider"}>
             {
                 properties.label ?
-                <Typography className={"input-slider-label"}>
-                    {properties.label}
-                </Typography> : <></>
+                    <Typography className={"input-slider-label"}>
+                        {properties.label}
+                    </Typography> : <></>
             }
             <Slider id={properties.id}
                     min={properties.min} max={properties.max} step={properties.step}
