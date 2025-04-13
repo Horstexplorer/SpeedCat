@@ -1,10 +1,21 @@
 # SpeedCat
 ###### A free and open-source, self-hosted tool for estimating network performance.  
-Built using TypeScript, React, and native web APIs, it is designed to be universally compatible across various devices, requiring only a web browser for access.  
+Built using TypeScript, React, and native web APIs, it is designed to be universally compatible across various desktop and mobile devices, requiring only a web browser for access.  
 SpeedCat operates fully client-side, requiring only a web server of your choice to self-host.
 All tests are conducted exclusively between the client and the self-hosted server, providing privacy and peace of mind.
 
 A demo is available at [demo.speedc.at](https://demo.speedc.at). Please don't break it, it's a tiny environment.
+
+<table>
+  <tr>
+    <td>
+      <img src=".github/images/desktop.png" alt="Speedcat Desktop View">
+    </td>
+    <td>
+      <img src=".github/images/mobile.png" alt="Speedcat Mobile View">
+    </td>
+  </tr>
+</table>
 
 ## Setup
 ### Prebuilt Docker image
