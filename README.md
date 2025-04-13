@@ -1,10 +1,11 @@
 # SpeedCat
 ###### A free and open-source, self-hosted tool for estimating network performance.  
-Built using TypeScript, React, and native web APIs, it is designed to be universally compatible across various desktop and mobile devices, requiring only a web browser for access.  
-SpeedCat operates fully client-side, requiring only a web server of your choice to self-host.
-All tests are conducted exclusively between the client and the self-hosted server, providing privacy and peace of mind.
 
-A demo is available at [demo.speedc.at](https://demo.speedc.at). Please don't break it, it's a tiny environment.
+Developed with TypeScript, React, and native web APIs, SpeedCat is built for universal compatibility across desktop and mobile platforms, accessible through any modern web browser.  
+All calculations are handled by the client, requiring only a web server of your choice to host the necessary static files.  
+Tests are conducted exclusively between the client and your self-hosted server, ensuring privacy and peace of mind.  
+
+A demo is available at [demo.speedc.at](https://demo.speedc.at). Please handle with care; it's a lightweight environment.
 
 <table>
   <tr>
@@ -19,11 +20,11 @@ A demo is available at [demo.speedc.at](https://demo.speedc.at). Please don't br
 
 ## Setup
 ### Prebuilt Docker image
-Prebuild docker images are available which can be utilized via docker compose.
+Ready-to-use Docker images using Nginx are available and easily deployable with Docker Compose.
 ```yaml
 services:
   speedcat:
-    image: ghcr.io/horstexplorer/speedcat:<hash>
+    image: ghcr.io/horstexplorer/speedcat:<release>
     container_name: SpeedCat
     restart: unless-stopped
     ports:
@@ -31,7 +32,7 @@ services:
 ```
 
 ### Manual
-Build the application via npm and deploy it on your own webserver or via self built docker container.
+Build the application using npm, then deploy it on your own web server or within a custom Docker container.
 ```bash
 # Install dependencies
 npm install
@@ -42,18 +43,18 @@ npm run build
 # Generate test file payloads (not required for building the docker image in the next step)
 ./test-file-setup.sh
 ```
-Copy and serve the build output from `dist` to your webserver location or build your local docker image.
+Either copy the contents of the `dist` folder to your web server’s root directory or build a local Docker image for deployment.
 ```bash
 # With docker build
-docker build -t selfbuilt-speedcat .
+docker build -t speedcat:selfbuilt .
 
 # or buildx
-docker buildx build -t selfbuilt-speedcat .
+docker buildx build -t speedcat:selfbuilt .
 ```
 
 ## Customization
-You can configure the available payload files available to SpeedCat. To do so, adjust the entries in the test-file-index.json.
-A minimal configuration as shown below is required.
+You can customize the payload files available to SpeedCat by modifying the `test-file-index.json`.  
+At a minimum, the configuration should include the following structure:
 ```json
 {
   "testFiles": [
@@ -75,8 +76,24 @@ A minimal configuration as shown below is required.
   ]
 }
 ```
-Entries must always include a valid `path` that points to a directory (using `test-files` is a good choice), along with a filename free of collisions.
-These files will be automatically generated with random data based on the specified `byteSize` property.
-The `selectable` property allows the option to be selected through the UI, while `default` indicates a pre-selected option.
+Each entry in the `test-file-index.json` must include:
 
-To ensure correct operations there has to be one file with a `byteSize` of `0` and `default` set to `true`, as well as one file with a `byteSize` greater than `0`, which must also be `selectable` and have `default` set to `true`.
+- A valid `path` pointing to a directory (using `test-files` is a recommended choice).
+- A unique `filename` to avoid collisions.
+- A `byteSize` value used to generate the file with random data.
+
+Optional properties:
+
+- `selectable`: Determines if the file is shown as an option in the UI.
+- `default`: Marks the file as pre-selected in the UI.
+
+To ensure correct operation, the configuration must include:
+
+- **One file** with:
+    - `byteSize`: `0`
+    - `default`: `true`
+
+- **One file** with:
+    - `byteSize`: greater than `0`
+    - `selectable`: `true`
+    - `default`: `true`
