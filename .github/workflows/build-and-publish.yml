@@ -60,7 +60,8 @@ jobs:
         run: |
           docker build \
             -t ${{ needs.provisioning.outputs.IMAGE_NAME }}:latest \
-            -t ${{ needs.provisioning.outputs.IMAGE_NAME }}:${{ needs.provisioning.outputs.RELEASE_TAG }}
+            -t ${{ needs.provisioning.outputs.IMAGE_NAME }}:${{ needs.provisioning.outputs.RELEASE_TAG }} \
+            .
           
           docker push ${{ needs.provisioning.outputs.IMAGE_NAME }}:latest
           docker push ${{ needs.provisioning.outputs.IMAGE_NAME }}:${{ needs.provisioning.outputs.RELEASE_TAG }}
