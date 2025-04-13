@@ -1,15 +1,13 @@
 #!/bin/bash
 
-FAST_TEST__RECREATE_PAYLOADS=${FAST_TEST__RECREATE_PAYLOADS:false}
-FAST_TEST__TEST_FILE_ROOT="public"
+SPEED_CAT__RECREATE_PAYLOADS=${SPEED_CAT__RECREATE_PAYLOADS:false}
+SPEED_CAT__TEST_FILE_ROOT=${SPEED_CAT__TEST_FILE_ROOT:"public"}
 
 echo "Automatic test file asset creation"
 
-echo $FAST_TEST__TEST_FILE_ROOT
+  cd "$SPEED_CAT__TEST_FILE_ROOT" || exit
 
-  cd "$FAST_TEST__TEST_FILE_ROOT" || exit
-
-  if [ "$FAST_TEST__RECREATE_PAYLOADS" = true ]; then
+  if [ "$SPEED_CAT__RECREATE_PAYLOADS" = true ]; then
     rm -rf test-files
   fi
 

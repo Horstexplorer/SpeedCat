@@ -9,10 +9,10 @@
     height: 45vh;
 
     .apexcharts-radial-series[seriesName="Download"] path {
-      stroke: $fast_test-primary;
+      stroke: $speed_cat-primary;
     }
     .apexcharts-radial-series[seriesName="Upload"] path {
-      stroke: $fast_test-tertiary;
+      stroke: $speed_cat-tertiary;
     }
   }
 
@@ -21,10 +21,10 @@
     height: 20vh;
 
     .scatter-title {
-      color: $fast_test-secondary;
+      color: $speed_cat-secondary;
     }
     .apexcharts-series[seriesName="Latency"] path {
-      fill: $fast_test-secondary;
+      fill: $speed_cat-secondary;
       opacity: .5;
     }
   }
@@ -34,10 +34,10 @@
     height: 20vh;
 
     .plot-title {
-      color: $fast_test-primary;
+      color: $speed_cat-primary;
     }
     .apexcharts-series[seriesName="Download"] path {
-      stroke: $fast_test-primary;
+      stroke: $speed_cat-primary;
       opacity: .5;
     }
   }
@@ -47,10 +47,10 @@
     height: 20vh;
 
     .plot-title {
-      color: $fast_test-tertiary;
+      color: $speed_cat-tertiary;
     }
     .apexcharts-series[seriesName="Upload"] path {
-      stroke: $fast_test-tertiary;
+      stroke: $speed_cat-tertiary;
       opacity: .5;
     }
   }
@@ -60,7 +60,7 @@
 
     padding: 1rem;
     width: 100%;
-    background-color: $fast_test-primary;
+    background-color: $speed_cat-primary;
     border-radius: $default-radius;
     font-size: xx-large;
     font-weight: bold;
