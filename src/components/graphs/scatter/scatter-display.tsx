@@ -31,6 +31,7 @@ export default function ScatterDisplay(properties: IScatterDisplayProperties) {
     const noShow = {show: false}
     const disabled = {enabled: false}
     const noFilter = {filter: {type: 'none'}}
+    const noPadding = {top: 0, right: 0, bottom: 0, left: 0}
 
     const options: ApexOptions = {
         chart: {
@@ -44,6 +45,9 @@ export default function ScatterDisplay(properties: IScatterDisplayProperties) {
                     speed: properties.visualProperties?.animation?.interval
                 }
             }
+        },
+        grid: {
+            padding: noPadding
         },
         tooltip: disabled,
         states: {

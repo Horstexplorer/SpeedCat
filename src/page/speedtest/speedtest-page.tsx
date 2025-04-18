@@ -10,9 +10,9 @@ import LatencyTest from "../../api/speedtest/tests/latency/latency-test.ts";
 import DownloadSpeedTest from "../../api/speedtest/tests/speed/download-speed-test.ts";
 import UploadSpeedTest from "../../api/speedtest/tests/speed/upload-speed-test.ts";
 import {generateRandomData} from "../../api/misc/data-generator.ts";
-import { ILatencyMeasurementEvent } from "../../api/speedtest/calculations/latency-calculation.ts";
+import {ILatencyMeasurementEvent} from "../../api/speedtest/calculations/latency-calculation.ts";
 import Value from "../../api/misc/units/value.ts";
-import { DataUnits } from "../../api/misc/units/types/data-units.ts";
+import {DataUnits} from "../../api/misc/units/types/data-units.ts";
 import {
     calculateSpeedCalculationResult,
     ISpeedCalculationResult,
@@ -26,23 +26,47 @@ import {clamp} from "../../api/misc/clamp.ts";
 
 export default function SpeedtestPage() {
 
-    const {updateIntervalMs, gauge: gaugeSettings} = useInterfaceStore()
+    const {
+        updateIntervalMs: displayUpdateIntervalMs,
+        gauge: gaugeSettings
+    } = useInterfaceStore()
 
-    const {_actions: unitActions} = useDataUnitStore()
+    const {
+        _actions: unitActions
+    } = useDataUnitStore()
 
-    const {_ctrl: assetCtrl} = useTestFileConfigurationStore()
+    const {
+        _ctrl: assetCtrl
+    } = useTestFileConfigurationStore()
     if (!assetCtrl.readyToBeUsed)
         throw assetCtrl.bootstrap()
 
-    const {enabled: latencyTestEnabled, method: latencyTestMethod, parameters: latencyTestParameters, _actions: latencyStateActions, _ctrl: latencyStoreControls} = useLatencyTestStore()
+    const {
+        enabled: latencyTestEnabled,
+        method: latencyTestMethod,
+        parameters: latencyTestParameters,
+        _actions: latencyStateActions,
+        _ctrl: latencyStoreControls
+    } = useLatencyTestStore()
     if (!latencyStoreControls.readyToBeUsed)
         throw latencyStoreControls.bootstrap()
 
-    const {enabled: downloadTestEnabled, parameters: downloadTestParameters, _actions: downloadStateActions, _ctrl: downloadStoreControls} = useDownloadSpeedTestStore()
+    const {
+        enabled: downloadTestEnabled,
+        parameters: downloadTestParameters,
+        _actions: downloadStateActions,
+        _ctrl: downloadStoreControls
+    } = useDownloadSpeedTestStore()
     if (!downloadStoreControls.readyToBeUsed)
         throw downloadStoreControls.bootstrap()
 
-    const {enabled: uploadTestEnabled, payloadSize: uploadPayloadSize, parameters: uploadTestParameters, _actions: uploadStateActions, _ctrl: uploadStoreControls} = useUploadSpeedTestStore()
+    const {
+        enabled: uploadTestEnabled,
+        payloadSize: uploadPayloadSize,
+        parameters: uploadTestParameters,
+        _actions: uploadStateActions,
+        _ctrl: uploadStoreControls
+    } = useUploadSpeedTestStore()
     if (!uploadStoreControls.readyToBeUsed)
         throw uploadStoreControls.bootstrap()
 
@@ -77,8 +101,12 @@ export default function SpeedtestPage() {
 
     const [testIsRunning, setTestRunning] = useState<boolean>(false)
 
-    const [gaugeValue, setGaugeValue] = useState<number[]>([0,0])
+    const [gaugeValue, setGaugeValue] = useState<number[]>([0, 0])
     const [gaugeOverlayText, setGaugeOverlayText] = useState<string | undefined>("SpeedCat")
+
+    function calculateGaugeFactor(value: number) {
+        return clamp(value / gaugeSettings.maxNumericValue, 0, 1)
+    }
 
     const [latencyMeasurements, setLatencyMeasurements] = useState<ILatencyMeasurementEvent[]>([])
     const [latencyOverlayText, setLatencyOverlayText] = useState<string | undefined>()
@@ -87,9 +115,43 @@ export default function SpeedtestPage() {
     const [downloadResults, setDownloadResults] = useState<ISpeedCalculationResult[]>([])
     const [downloadOverlayText, setDownloadOverlayText] = useState<string | undefined>()
 
+    function refreshDownloadDetails() {
+        if (downloadChangeDeltaBuffer.length <= 0) {
+            return
+        }
+        const downloadResult = calculateSpeedCalculationResult(downloadChangeDeltaBuffer)
+        setDownloadResults(previous => {
+            if (previous.length > 0)
+                return [...previous, downloadResult]
+            return [{samples: 0, averageDataPerSecond: new Value(0, DataUnits.BYTE)}, downloadResult]
+        })
+        const displayValue = unitActions.convert(downloadResult.averageDataPerSecond)
+        setGaugeOverlayText(`${displayValue.toString()}/s`)
+        setGaugeValue([calculateGaugeFactor(displayValue.value), 0])
+
+        downloadChangeDeltaBuffer = []
+    }
+
     let uploadChangeDeltaBuffer: ISpeedChangeDeltaEvent[] = []
     const [uploadResults, setUploadResults] = useState<ISpeedCalculationResult[]>([])
     const [uploadOverlayText, setUploadOverlayText] = useState<string | undefined>()
+
+    function refreshUploadDetails() {
+        if (uploadChangeDeltaBuffer.length <= 0) {
+            return
+        }
+        const uploadResult = calculateSpeedCalculationResult(uploadChangeDeltaBuffer)
+        setUploadResults(previous => {
+            if (previous.length > 0)
+                return [...previous, uploadResult]
+            return [{samples: 0, averageDataPerSecond: new Value(0, DataUnits.BYTE)}, uploadResult]
+        })
+        const displayValue = unitActions.convert(uploadResult.averageDataPerSecond)
+        setGaugeOverlayText(`${displayValue.toString()}/s`)
+        setGaugeValue(previous => [previous[0], calculateGaugeFactor(displayValue.value)])
+
+        uploadChangeDeltaBuffer = []
+    }
 
     async function runTestSuite() {
         setTestRunning(true)
@@ -104,38 +166,12 @@ export default function SpeedtestPage() {
         setUploadResults([])
         setUploadOverlayText(undefined)
 
-        function calculateGaugeFactor(value: number) {
-            return clamp(value / gaugeSettings.maxNumericValue, 0, 1)
+        function refreshDetailDisplays() {
+            refreshDownloadDetails()
+            refreshUploadDetails()
         }
 
-        function doPerformUpdate() {
-            if (downloadChangeDeltaBuffer.length > 0) {
-                const downloadResult= calculateSpeedCalculationResult(downloadChangeDeltaBuffer)
-                setDownloadResults(previous => {
-                    if (previous.length > 0)
-                        return [...previous, downloadResult]
-                    return [{ samples: 0, averageDataPerSecond: new Value(0, DataUnits.BYTE) }, downloadResult]
-                })
-                const displayValue = unitActions.convert(downloadResult.averageDataPerSecond)
-                setGaugeOverlayText(`${displayValue.toString()}/s`)
-                setGaugeValue([calculateGaugeFactor(displayValue.value), 0])
-
-                downloadChangeDeltaBuffer = []
-            } else if (uploadChangeDeltaBuffer.length > 0) {
-                const uploadResult = calculateSpeedCalculationResult(uploadChangeDeltaBuffer)
-                setUploadResults(previous => {
-                    if (previous.length > 0)
-                        return [...previous, uploadResult]
-                    return [{ samples: 0, averageDataPerSecond: new Value(0, DataUnits.BYTE) }, uploadResult]
-                })
-                const displayValue = unitActions.convert(uploadResult.averageDataPerSecond)
-                setGaugeOverlayText(`${displayValue.toString()}/s`)
-                setGaugeValue(previous => [previous[0], calculateGaugeFactor(displayValue.value)])
-
-                uploadChangeDeltaBuffer = []
-            }
-        }
-        const updateLoop = setInterval(() => doPerformUpdate(), updateIntervalMs)
+        const refreshTask = setInterval(refreshDetailDisplays, displayUpdateIntervalMs)
 
         try {
             await latencyTest.run({
@@ -167,13 +203,14 @@ export default function SpeedtestPage() {
                     result: value => setUploadOverlayText(`${unitActions.convert(value.averageDataPerSecond).toString()}/s`)
                 }
             })
-        }catch (e) {
+        } catch (e) {
             console.error(e)
         }
 
-        clearInterval(updateLoop)
-        doPerformUpdate()
-        setGaugeValue([0,0])
+        clearInterval(refreshTask)
+        refreshDetailDisplays()
+
+        setGaugeValue([0, 0])
         setGaugeOverlayText("SpeedCat")
         setTestRunning(false)
     }
@@ -188,7 +225,7 @@ export default function SpeedtestPage() {
                         scale: gaugeSettings.scale,
                         animation: {
                             enabled: true,
-                            interval: updateIntervalMs
+                            interval: displayUpdateIntervalMs
                         }
                     }}
                     data={[
@@ -211,7 +248,7 @@ export default function SpeedtestPage() {
                             visualProperties={{
                                 animation: {
                                     enabled: true,
-                                    interval: updateIntervalMs
+                                    interval: displayUpdateIntervalMs
                                 }
                             }}
                             data={[
@@ -230,7 +267,7 @@ export default function SpeedtestPage() {
                             visualProperties={{
                                 animation: {
                                     enabled: true,
-                                    interval: updateIntervalMs
+                                    interval: displayUpdateIntervalMs
                                 }
                             }}
                             data={[
@@ -249,7 +286,7 @@ export default function SpeedtestPage() {
                             visualProperties={{
                                 animation: {
                                     enabled: true,
-                                    interval: updateIntervalMs
+                                    interval: displayUpdateIntervalMs
                                 }
                             }}
                             data={[
@@ -263,9 +300,13 @@ export default function SpeedtestPage() {
                 </Grid>
                 {
                     !testIsRunning ?
-                        <Button className={"test-trigger"} variant="contained" onClick={runTestSuite}>
-                            START
-                        </Button>
+                        <Grid container columns={3} spacing={1}>
+                            <Grid size={1} offset={1}>
+                                <Button className={"test-trigger"} variant="contained" onClick={runTestSuite}>
+                                    START
+                                </Button>
+                            </Grid>
+                        </Grid>
                         : <></>
                 }
             </Stack>

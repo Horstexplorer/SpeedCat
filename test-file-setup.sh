@@ -11,16 +11,16 @@ echo "Automatic test file asset creation"
     rm -rf test-files
   fi
 
-  jq -c '.testFiles[]' test-file-index.json | while read obj; do
+  jq -c '.testFiles[]' test-file-index.json | while read -r obj; do
 
     path=$(jq -r '.path' <<< $obj)
     byteSize=$(jq -r '.byteSize' <<< "$obj")
-    mkdir -p $(dirname $path)
+    mkdir -p "$(dirname "$path")"
 
-    if [ ! -f $path ]; then
-      head -c $byteSize /dev/urandom > $path
-    elif [ $(wc -c < $path) -ne $byteSize ]; then
-        head -c $byteSize /dev/urandom > $path
+    if [ ! -f "$path" ]; then
+      head -c "$byteSize" /dev/urandom > "$path"
+    elif [ "$(wc -c < "$path")" -ne "$byteSize" ]; then
+        head -c "$byteSize" /dev/urandom > "$path"
     fi
 
   done;

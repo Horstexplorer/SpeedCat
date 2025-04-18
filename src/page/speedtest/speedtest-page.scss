@@ -2,11 +2,14 @@
 
 .speedtest-page {
   height: 100%;
-  margin: 1rem;
+  padding: 1rem;
+
+  $gauge-height: 45vh;
+  $graph-height: 20vh;
 
   .gauge-display {
 
-    height: 45vh;
+    height: $gauge-height;
 
     .apexcharts-radial-series[seriesName="Download"] path {
       stroke: $speed_cat-primary;
@@ -18,7 +21,7 @@
 
   .latency-display{
 
-    height: 20vh;
+    height: $graph-height;
 
     .scatter-title {
       color: $speed_cat-secondary;
@@ -31,7 +34,7 @@
 
   .download-display{
 
-    height: 20vh;
+    height: $graph-height;
 
     .plot-title {
       color: $speed_cat-primary;
@@ -44,7 +47,7 @@
 
   .upload-display{
 
-    height: 20vh;
+    height: $graph-height;
 
     .plot-title {
       color: $speed_cat-tertiary;

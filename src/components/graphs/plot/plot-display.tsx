@@ -32,6 +32,7 @@ export default function PlotDisplay(properties: IPlotDisplayProperties){
     const noShow = {show: false}
     const disabled = {enabled: false}
     const noFilter = {filter: {type: 'none'}}
+    const noPadding = {top: 0, right: 0, bottom: 0, left: 0}
 
     const options: ApexOptions = {
         chart: {
@@ -45,6 +46,9 @@ export default function PlotDisplay(properties: IPlotDisplayProperties){
                     speed: properties.visualProperties?.animation?.interval
                 }
             }
+        },
+        grid: {
+            padding: noPadding
         },
         tooltip: disabled,
         states: {
@@ -85,6 +89,7 @@ export default function PlotDisplay(properties: IPlotDisplayProperties){
                     options={options}
                     series={properties.data}
                     height={"100%"}
+                    width={"100%"}
                 />
             </Stack>
         </Paper>
